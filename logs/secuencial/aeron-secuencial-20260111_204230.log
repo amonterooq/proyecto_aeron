@@ -1,0 +1,38 @@
+=== INICIO SIMULACIÓN AEROPUERTO (MODO SECUENCIAL) ===
+Avión [IBE-001 - IN_FLIGHT] Inicia ciclo.
+Torre: Recibida solicitud de aterrizaje del avión IBE-001
+Torre: Avión IBE-001 autorizado a aterrizar en Pista 1 y puerta Gate 1
+Avión [IBE-001 - LANDING_ASSIGNED] Asignado a Pista 1 y Gate 1
+Avión [IBE-001 - LANDING] Aterrizando en Pista 1 (100ms)...
+Torre: Avión IBE-001 ha aterrizado y liberado la pista.
+Avión [IBE-001 - LANDED] Aterrizado.
+Avión [IBE-001] Ocupa Gate 1
+Avión [IBE-001 - BOARDING] Pasajeros subiendo...
+Avión [IBE-001 - BOARDED] Embarque completado.
+Avión [IBE-001] Libera Gate 1
+Torre: Recibida solicitud de despegue del avión IBE-001
+Torre: Avión IBE-001 autorizado a despegar en Pista 1
+Avión [IBE-001 - TAKEOFF_ASSIGNED] Asignado a Pista 1 para despegue.
+Avión [IBE-001 - DEPARTING] Despegando en Pista 1 (100ms)...
+Torre: Avión IBE-001 ha despegado y salido del espacio aéreo.
+Avión [IBE-001 - DEPARTED] Despegue exitoso.
+Avión [IBE-001 - DEPARTED] Ciclo completado en 284 ms.
+Avión [RYR-002 - IN_FLIGHT] Inicia ciclo.
+Torre: Recibida solicitud de aterrizaje del avión RYR-002
+Torre: Avión RYR-002 autorizado a aterrizar en Pista 1 y puerta Gate 1
+Avión [RYR-002 - LANDING_ASSIGNED] Asignado a Pista 1 y Gate 1
+Avión [RYR-002 - LANDING] Aterrizando en Pista 1 (100ms)...
+Torre: Avión RYR-002 ha aterrizado y liberado la pista.
+Avión [RYR-002 - LANDED] Aterrizado.
+Avión [RYR-002] Ocupa Gate 1
+Avión [RYR-002 - BOARDING] Pasajeros subiendo...
+Avión [RYR-002 - BOARDED] Embarque completado.
+Avión [RYR-002] Libera Gate 1
+Torre: Recibida solicitud de despegue del avión RYR-002
+Torre: Avión RYR-002 autorizado a despegar en Pista 1
+Avión [RYR-002 - TAKEOFF_ASSIGNED] Asignado a Pista 1 para despegue.
+Avión [RYR-002 - DEPARTING] Despegando en Pista 1 (100ms)...
+Torre: Avión RYR-002 ha despegado y salido del espacio aéreo.
+Avión [RYR-002 - DEPARTED] Despegue exitoso.
+Avión [RYR-002 - DEPARTED] Ciclo completado en 281 ms.
+=== FIN DE LA SIMULACIÓN ===
