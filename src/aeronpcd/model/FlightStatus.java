@@ -1,15 +1,15 @@
 package aeronpcd.model;
 
 public enum FlightStatus {
-    IN_FLIGHT, // En vuelo, iniciando
-    LANDING_REQUESTED, // Solicitud enviada a torre [cite: 163]
-    LANDING_ASSIGNED, // Torre asignó pista y puerta [cite: 177]
-    LANDING, // Aterrizando (duración 100ms) [cite: 201]
-    LANDED, // Ya en tierra, libera pista [cite: 211]
-    BOARDING, // Pasajeros subiendo [cite: 227]
-    BOARDED, // Embarque completo [cite: 240]
-    TAKEOFF_REQUESTED, // Pide despegar [cite: 259]
-    TAKEOFF_ASSIGNED, // Torre asigna pista despegue [cite: 274]
-    DEPARTING, // Despegando (duración 100ms) [cite: 296]
-    DEPARTED // Fuera del sistema [cite: 308]
+    IN_FLIGHT, // En vuelo
+    LANDING_REQUEST, // Aterrizaje solicitado (Esperando respuesta)
+    LANDING_ASSIGNED, // Aterrizaje autorizado (Tiene pista y puerta asignada)
+    LANDING, // Aterrizando (Ocupando pista)
+    LANDED, // Aterrizado (Ya en tierra, libera pista)
+    BOARDING, // Embarcando (Pasajeros subiendo)
+    BOARDED, // Embarcado (Listo para pedir salida)
+    TAKEOFF_REQUESTED, // Despegue solicitado
+    TAKEOFF_ASSIGNED, // Despegue autorizado (Tiene pista asignada)
+    DEPARTING, // Despegando (Ocupando pista)
+    DEPARTED // Despegado (Fin del ciclo)
 }

@@ -1,11 +1,11 @@
 package aeronpcd.driver;
 
+import aeronpcd.gui.AirportWindow;
 import aeronpcd.model.Airplane;
 import aeronpcd.resources.Gate;
 import aeronpcd.resources.Runway;
 import aeronpcd.tower.ControlTower;
 import aeronpcd.util.Logger;
-import aeronpcd.gui.AirportWindow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,60 +13,56 @@ import java.util.List;
 public class AirportDriver {
 
     public static void main(String[] args) {
-        // 1. Configuración inicial
-        
-        // --- INICIALIZAMOS LA VENTANA ---
-        AirportWindow window = new AirportWindow(); 
-        
-        // Elegimos modo "secuencial" para el log
+        // 1. INICIALIZACIÓN DE INTERFAZ Y LOGS
+        AirportWindow window = new AirportWindow();
+
         Logger.setup("secuencial");
-        
-        String startMsg = "=== INICIO SIMULACIÓN AEROPUERTO (MODO SECUENCIAL) ===";
+        String startMsg = "=== INICIO SIMULACIÓN AEROPUERTO (MODO SECUENCIAL - PRÁCTICA 2) ===";
         Logger.log(startMsg);
-        window.appendLog(startMsg); // <--- Escribimos también en la ventana
+        window.appendLog(startMsg);
 
-        // 2. Crear Recursos (3 Pistas, 5 Puertas)
+        // 2. CREACIÓN DE RECURSOS
+        // 3 Pistas
         List<Runway> runways = new ArrayList<>();
-        runways.add(new Runway("Pista 1"));
-        runways.add(new Runway("Pista 2"));
-        runways.add(new Runway("Pista 3"));
+        runways.add(new Runway("PIS1"));
+        runways.add(new Runway("PIS2"));
+        runways.add(new Runway("PIS3"));
 
+        // 5 Puertas
         List<Gate> gates = new ArrayList<>();
-        gates.add(new Gate("Gate 1"));
-        gates.add(new Gate("Gate 2"));
-        gates.add(new Gate("Gate 3"));
-        gates.add(new Gate("Gate 4"));
-        gates.add(new Gate("Gate 5"));
+        gates.add(new Gate("PUE1"));
+        gates.add(new Gate("PUE2"));
+        gates.add(new Gate("PUE3"));
+        gates.add(new Gate("PUE4"));
+        gates.add(new Gate("PUE5"));
 
-        // 3. Inicializar Torre de Control
+        // 3. INICIALIZAR TORRE DE CONTROL
         ControlTower tower = new ControlTower(runways, gates);
+        tower.setWindow(window);
 
-        // 4. Crear Aviones (Probamos con 2 aviones primero)
+        // 4. CREAR AVIONES
         List<Airplane> airplanes = new ArrayList<>();
         airplanes.add(new Airplane("IBE-001", tower));
         airplanes.add(new Airplane("RYR-002", tower));
-        // Puedes añadir más aquí para probar con 20
 
-        // 5. Ejecución Secuencial
-        // En este modo, un avión hace todo su ciclo antes de que empiece el siguiente
+        // 5. EJECUCIÓN DEL CICLO SECUENCIAL
         for (Airplane plane : airplanes) {
-            
-            // Avisamos a la ventana qué avión va a procesarse
-            window.appendLog("\n--- Procesando avión: " + plane.getId() + " ---");
-            
+            String sep = "\n--- Iniciando secuencia para " + plane.getId() + " ---";
+            Logger.log(sep);
+            window.appendLog(sep);
+
             plane.runSequential();
 
-            // Simulación de pequeña pausa entre aviones para legibilidad
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
             }
         }
 
-        String endMsg = "=== FIN DE LA SIMULACIÓN ===";
+        String endMsg = "\n=== FIN DE LA SIMULACIÓN ===";
         Logger.log(endMsg);
-        window.appendLog(endMsg); // <--- Finalizamos en la ventana
-        
+        window.appendLog(endMsg);
+
         Logger.close();
     }
 }

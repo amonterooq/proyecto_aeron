@@ -9,13 +9,10 @@ public class Airplane {
     private String id;
     private ControlTower tower;
     private FlightStatus status;
-    private Passenger passenger; // Representación de pasajeros
 
-    // Recursos asignados temporalmente
     private Runway currentRunway;
     private Gate currentGate;
 
-    // Tiempos para estadísticas
     private long startTime;
     private long endTime;
 
@@ -23,9 +20,78 @@ public class Airplane {
         this.id = id;
         this.tower = tower;
         this.status = FlightStatus.IN_FLIGHT;
-        this.passenger = new Passenger("Pasajero-" + id);
     }
 
+    // --- MÉTODOS DE SINCRONIZACIÓN Y CICLO ---
+
+    public void runSequential() {
+        this.startTime = System.currentTimeMillis();
+        Logger.log("Aviones\n  Avión [" + id + " - " + status + "] Inicia ciclo");
+
+        // 1. SOLICITAR ATERRIZAJE (Bloqueante)
+        this.status = FlightStatus.LANDING_REQUEST;
+        Logger.log("Aviones\n  Avión [" + id + "] Solicita aterrizaje y ESPERA...");
+        sendRequestAndWait(Request.Type.LANDING);
+
+        if (this.status == FlightStatus.LANDING_ASSIGNED) {
+            Logger.log("Aviones\n  Avión [" + id + "] Recibe luz verde. Asignado a " + currentRunway.getId());
+
+            // 2. ATERRIZAR
+            performAction(100, "Aterrizando", FlightStatus.LANDING);
+            sendRequestAndWait(Request.Type.LANDED);
+
+            // 3. EMBARCAR
+            performAction(50, "Embarcando", FlightStatus.BOARDING);
+            // El boarding no requiere recurso nuevo, pero notificamos para cambiar estado
+            sendRequestAndWait(Request.Type.BOARDING);
+
+            // Fin embarque
+            sendRequestAndWait(Request.Type.BOARDED);
+
+            // 4. SOLICITAR DESPEGUE (Bloqueante)
+            this.status = FlightStatus.TAKEOFF_REQUESTED;
+            Logger.log("Aviones\n  Avión [" + id + "] Solicita despegue y ESPERA...");
+            sendRequestAndWait(Request.Type.TAKEOFF);
+
+            if (this.status == FlightStatus.TAKEOFF_ASSIGNED) {
+                Logger.log("Aviones\n  Avión [" + id + "] Recibe luz verde. Despegue en " + currentRunway.getId());
+                performAction(100, "Despegando", FlightStatus.DEPARTING);
+                sendRequestAndWait(Request.Type.DEPARTED);
+            }
+        } else {
+            Logger.log("Aviones\n  Avión [" + id + "] No pudo aterrizar (Sin recursos).");
+        }
+
+        this.endTime = System.currentTimeMillis();
+        Logger.log("Aviones\n  Avión [" + id + " - DEPARTED] Ciclo completado en " + (endTime - startTime) + " ms");
+    }
+
+    // --- MÉTODO CLAVE PARA ESPERAR AL OPERARIO ---
+    private void sendRequestAndWait(Request.Type type) {
+        synchronized (this) {
+            // Enviamos petición
+            tower.addRequest(new Request(this, type));
+
+            try {
+                // Nos dormimos hasta que el Operario nos haga notify()
+                this.wait();
+            } catch (InterruptedException e) {
+                Logger.log("Avión [" + id + "] Interrumpido mientras esperaba.");
+            }
+        }
+    }
+
+    private void performAction(int time, String actionName, FlightStatus tempStatus) {
+        this.status = tempStatus;
+        // Solo log visual, no cambia estado en torre aun
+        Logger.log("Aviones\n  Avión [" + id + " - " + status + "] " + actionName + " (" + time + "ms)...");
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException e) {
+        }
+    }
+
+    // Getters y Setters
     public String getId() {
         return id;
     }
@@ -38,111 +104,20 @@ public class Airplane {
         this.status = status;
     }
 
-    // Métodos para recibir recursos de la torre
-    public void assignResources(Runway runway, Gate gate) {
-        this.currentRunway = runway;
-        this.currentGate = gate;
-        this.status = FlightStatus.LANDING_ASSIGNED;
-        Logger.log("Avión [" + id + " - " + status + "] Asignado a " + runway.getId() + " y " + gate.getId());
+    public void setResources(Runway r, Gate g) {
+        this.currentRunway = r;
+        this.currentGate = g;
     }
 
-    public void assignTakeoffRunway(Runway runway) {
-        this.currentRunway = runway;
-        this.status = FlightStatus.TAKEOFF_ASSIGNED;
-        Logger.log("Avión [" + id + " - " + status + "] Asignado a " + runway.getId() + " para despegue.");
+    public void setTakeoffRunway(Runway r) {
+        this.currentRunway = r;
     }
 
-    // --- Lógica del Ciclo de Vida (Secuencial) ---
-    // Este método ejecuta todo el flujo de golpe (para el modo secuencial)
-    public void runSequential() {
-        this.startTime = System.currentTimeMillis();
-        Logger.log("Avión [" + id + " - " + status + "] Inicia ciclo.");
-
-        // 1. Solicitar Aterrizaje
-        tower.requestLanding(this);
-
-        if (currentRunway != null && currentGate != null) {
-            // 2. Aterrizar
-            performLanding();
-
-            // 3. Ir a puerta y estacionar
-            performDocking();
-
-            // 4. Embarque
-            performBoarding();
-
-            // 5. Salir de puerta y pedir despegue
-            performUndocking();
-            tower.requestTakeoff(this);
-
-            if (currentRunway != null) {
-                // 6. Despegar
-                performTakeoff();
-            }
-        }
-
-        this.endTime = System.currentTimeMillis();
-        long duration = endTime - startTime;
-        Logger.log("Avión [" + id + " - " + status + "] Ciclo completado en " + duration + " ms.");
+    public Runway getCurrentRunway() {
+        return currentRunway;
     }
 
-    // --- Acciones individuales simuladas ---
-
-    private void performLanding() {
-        this.status = FlightStatus.LANDING;
-        currentRunway.occupy(this.id);
-        Logger.log("Avión [" + id + " - " + status + "] Aterrizando en " + currentRunway.getId() + " (100ms)...");
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-        } // Simula tiempo
-
-        this.status = FlightStatus.LANDED;
-        currentRunway.free(); // Libera pista al terminar aterrizaje
-        tower.notifyLandingCompleted(this);
-        Logger.log("Avión [" + id + " - " + status + "] Aterrizado.");
-    }
-
-    private void performDocking() {
-        currentGate.occupy(this.id);
-        Logger.log("Avión [" + id + "] Ocupa " + currentGate.getId());
-    }
-
-    private void performBoarding() {
-        this.status = FlightStatus.BOARDING;
-        Logger.log("Avión [" + id + " - " + status + "] Pasajeros subiendo...");
-        // Simulación breve de embarque
-        try {
-            Thread.sleep(50);
-        } catch (InterruptedException e) {
-        }
-
-        this.status = FlightStatus.BOARDED;
-        Logger.log("Avión [" + id + " - " + status + "] Embarque completado.");
-    }
-
-    private void performUndocking() {
-        currentGate.free();
-        Logger.log("Avión [" + id + "] Libera " + currentGate.getId());
-    }
-
-    private void performTakeoff() {
-        this.status = FlightStatus.DEPARTING;
-        currentRunway.occupy(this.id);
-        Logger.log("Avión [" + id + " - " + status + "] Despegando en " + currentRunway.getId() + " (100ms)...");
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-        }
-
-        currentRunway.free();
-        this.status = FlightStatus.DEPARTED;
-        tower.notifyDeparture(this);
-        Logger.log("Avión [" + id + " - " + status + "] Despegue exitoso.");
-    }
-
-    @Override
-    public String toString() {
-        return "Avión " + id + " [" + status + "]";
+    public Gate getCurrentGate() {
+        return currentGate;
     }
 }

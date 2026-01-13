@@ -1,0 +1,159 @@
+=== INICIO SIMULACIÓN AEROPUERTO (MODO SECUENCIAL - PRÁCTICA 2) ===
+
+--- Iniciando secuencia para IBE-001 ---
+Aviones
+  Avión [IBE-001 - IN_FLIGHT] Inicia ciclo
+Aviones
+  Avión [IBE-001] Solicita aterrizaje y ESPERA...
+Torre de control
+  Recibida solicitud LANDING de Avión [IBE-001]
+Torre de control
+  Operario [OP-1] atiende LANDING para IBE-001
+Torre de control
+  Asignados: Pista PIS1 y Puerta PUE1 a IBE-001
+Panel de vuelos
+  Flight: IBE-001 Status: LANDING_ASSIGNED
+Torre de control
+  Operario [OP-1] FINALIZÓ LANDING para IBE-001
+Aviones
+  Avión [IBE-001] Recibe luz verde. Asignado a PIS1
+Aviones
+  Avión [IBE-001 - LANDING] Aterrizando (100ms)...
+Torre de control
+  Recibida solicitud LANDED de Avión [IBE-001]
+Torre de control
+  Operario [OP-4] atiende LANDED para IBE-001
+Torre de control
+  Pista [PIS1] liberada por IBE-001
+Panel de vuelos
+  Flight: IBE-001 Status: LANDED
+Torre de control
+  Operario [OP-4] FINALIZÓ LANDED para IBE-001
+Aviones
+  Avión [IBE-001 - BOARDING] Embarcando (50ms)...
+Torre de control
+  Recibida solicitud BOARDING de Avión [IBE-001]
+Torre de control
+  Operario [OP-1] atiende BOARDING para IBE-001
+Panel de vuelos
+  Flight: IBE-001 Status: BOARDING
+Torre de control
+  Operario [OP-1] FINALIZÓ BOARDING para IBE-001
+Torre de control
+  Recibida solicitud BOARDED de Avión [IBE-001]
+Torre de control
+  Operario [OP-4] atiende BOARDED para IBE-001
+Torre de control
+  Puerta [PUE1] liberada por IBE-001
+Panel de vuelos
+  Flight: IBE-001 Status: BOARDED
+Torre de control
+  Operario [OP-4] FINALIZÓ BOARDED para IBE-001
+Aviones
+  Avión [IBE-001] Solicita despegue y ESPERA...
+Torre de control
+  Recibida solicitud TAKEOFF de Avión [IBE-001]
+Torre de control
+  Operario [OP-1] atiende TAKEOFF para IBE-001
+Torre de control
+  Asignada Pista PIS1 para despegue de IBE-001
+Panel de vuelos
+  Flight: IBE-001 Status: TAKEOFF_ASSIGNED
+Torre de control
+  Operario [OP-1] FINALIZÓ TAKEOFF para IBE-001
+Aviones
+  Avión [IBE-001] Recibe luz verde. Despegue en PIS1
+Aviones
+  Avión [IBE-001 - DEPARTING] Despegando (100ms)...
+Torre de control
+  Recibida solicitud DEPARTED de Avión [IBE-001]
+Torre de control
+  Operario [OP-4] atiende DEPARTED para IBE-001
+Torre de control
+  Pista [PIS1] liberada (Fin ciclo IBE-001)
+Panel de vuelos
+  Flight: IBE-001 Status: DEPARTED
+Torre de control
+  Operario [OP-4] FINALIZÓ DEPARTED para IBE-001
+Aviones
+  Avión [IBE-001 - DEPARTED] Ciclo completado en 3359 ms
+
+--- Iniciando secuencia para RYR-002 ---
+Aviones
+  Avión [RYR-002 - IN_FLIGHT] Inicia ciclo
+Aviones
+  Avión [RYR-002] Solicita aterrizaje y ESPERA...
+Torre de control
+  Recibida solicitud LANDING de Avión [RYR-002]
+Torre de control
+  Operario [OP-1] atiende LANDING para RYR-002
+Torre de control
+  Asignados: Pista PIS1 y Puerta PUE1 a RYR-002
+Panel de vuelos
+  Flight: RYR-002 Status: LANDING_ASSIGNED
+Torre de control
+  Operario [OP-1] FINALIZÓ LANDING para RYR-002
+Aviones
+  Avión [RYR-002] Recibe luz verde. Asignado a PIS1
+Aviones
+  Avión [RYR-002 - LANDING] Aterrizando (100ms)...
+Torre de control
+  Recibida solicitud LANDED de Avión [RYR-002]
+Torre de control
+  Operario [OP-4] atiende LANDED para RYR-002
+Torre de control
+  Pista [PIS1] liberada por RYR-002
+Panel de vuelos
+  Flight: RYR-002 Status: LANDED
+Torre de control
+  Operario [OP-4] FINALIZÓ LANDED para RYR-002
+Aviones
+  Avión [RYR-002 - BOARDING] Embarcando (50ms)...
+Torre de control
+  Recibida solicitud BOARDING de Avión [RYR-002]
+Torre de control
+  Operario [OP-1] atiende BOARDING para RYR-002
+Panel de vuelos
+  Flight: RYR-002 Status: BOARDING
+Torre de control
+  Operario [OP-1] FINALIZÓ BOARDING para RYR-002
+Torre de control
+  Recibida solicitud BOARDED de Avión [RYR-002]
+Torre de control
+  Operario [OP-4] atiende BOARDED para RYR-002
+Torre de control
+  Puerta [PUE1] liberada por RYR-002
+Panel de vuelos
+  Flight: RYR-002 Status: BOARDED
+Torre de control
+  Operario [OP-4] FINALIZÓ BOARDED para RYR-002
+Aviones
+  Avión [RYR-002] Solicita despegue y ESPERA...
+Torre de control
+  Recibida solicitud TAKEOFF de Avión [RYR-002]
+Torre de control
+  Operario [OP-1] atiende TAKEOFF para RYR-002
+Torre de control
+  Asignada Pista PIS1 para despegue de RYR-002
+Panel de vuelos
+  Flight: RYR-002 Status: TAKEOFF_ASSIGNED
+Torre de control
+  Operario [OP-1] FINALIZÓ TAKEOFF para RYR-002
+Aviones
+  Avión [RYR-002] Recibe luz verde. Despegue en PIS1
+Aviones
+  Avión [RYR-002 - DEPARTING] Despegando (100ms)...
+Torre de control
+  Recibida solicitud DEPARTED de Avión [RYR-002]
+Torre de control
+  Operario [OP-4] atiende DEPARTED para RYR-002
+Torre de control
+  Pista [PIS1] liberada (Fin ciclo RYR-002)
+Panel de vuelos
+  Flight: RYR-002 Status: DEPARTED
+Torre de control
+  Operario [OP-4] FINALIZÓ DEPARTED para RYR-002
+Aviones
+  Avión [RYR-002 - DEPARTED] Ciclo completado en 3315 ms
+
+=== FIN DE LA SIMULACIÓN ===

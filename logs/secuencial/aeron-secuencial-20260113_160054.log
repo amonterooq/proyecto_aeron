@@ -1,0 +1,199 @@
+=== INICIO SIMULACIÓN AEROPUERTO (MODO SECUENCIAL - PRÁCTICA 2) ===
+
+--- Iniciando secuencia para IBE-001 ---
+Aviones
+  Avión [IBE-001 - IN_FLIGHT] Inicia ciclo
+Aviones
+  Avión [IBE-001 - IN_FLIGHT] Solicita aterrizaje a torre de control
+Torre de control
+  Recibida la solicitud de aterrizaje de Avión [IBE-001 - LANDING_REQUEST]
+Torre de control
+  Operario [OP-001] ha cogido una petición de tipo LANDING para Avión [IBE-001 - LANDING_REQUEST]
+Torre de control
+  Procesando petición de aterrizaje de Avión [IBE-001-LANDING_REQUEST]
+Torre de control
+  Pista [PIS1] pasa a estar ocupada por el avión IBE-001
+Torre de control
+  Puerta [PUE1] pasa a estar ocupada por el avión IBE-001
+Torre de control
+  Avión [IBE-001] autorizado para aterrizar en Pista [PIS1]
+Torre de control
+  Avión [IBE-001] autorizado para embarcar en Puerta [PUE1]
+Panel de vuelos
+  Flight: IBE-001 Status: LANDING_ASSIGNED
+Torre de control
+  Operario [OP-001] ha completado la petición de tipo LANDING para Avión [IBE-001 - LANDING_ASSIGNED]
+Aviones
+  Avión [IBE-001 - LANDING_ASSIGNED] Me ha tocado aterrizar en la Pista [PIS1]
+Aviones
+  Avión [IBE-001 - LANDING_ASSIGNED] Me ha tocado embarcar en la Puerta [PUE1]
+Aviones
+  Avión [IBE-001 - LANDING] Aterrizando (100ms)...
+Torre de control
+  Recibida la notificación de aterrizaje de Avión [IBE-001 - LANDING]
+Torre de control
+  Operario [OP-001] ha cogido una petición de tipo LANDED para Avión [IBE-001 - LANDING]
+Torre de control
+  Procesando notificación de aterrizaje de Avión [IBE-001 - LANDING]
+Torre de control
+  Pista [PIS1] se libera
+Panel de vuelos
+  Flight: IBE-001 Status: LANDED
+Torre de control
+  Operario [OP-001] ha completado la petición de tipo LANDED para Avión [IBE-001 - LANDED]
+Torre de control
+  Recibida notificación de inicio embarque IBE-001
+Torre de control
+  Operario [OP-001] ha cogido una petición de tipo BOARDING para Avión [IBE-001 - LANDED]
+Panel de vuelos
+  Flight: IBE-001 Status: BOARDING
+Torre de control
+  Operario [OP-001] ha completado la petición de tipo BOARDING para Avión [IBE-001 - BOARDING]
+Aviones
+  Avión [IBE-001 - BOARDING] Embarcando pasajeros...
+Torre de control
+  Recibida la notificación de finalizacion de embarque de Avión [IBE-001-BOARDING]
+Torre de control
+  Operario [OP-001] ha cogido una petición de tipo BOARDED para Avión [IBE-001 - BOARDING]
+Torre de control
+  Procesando notificación de finalización de embarque de Avión [IBE-001 - BOARDING]
+Torre de control
+  Puerta [PUE1] se libera
+Panel de vuelos
+  Flight: IBE-001 Status: BOARDED
+Torre de control
+  Operario [OP-001] ha completado la petición de tipo BOARDED para Avión [IBE-001 - BOARDED]
+Aviones
+  Avión [IBE-001 - TAKEOFF_REQUESTED] Solicitud de despegue en cola
+Torre de control
+  Recibida la solicitud de despegue para Avión [IBE-001 - TAKEOFF_REQUESTED]
+Torre de control
+  Operario [OP-001] ha cogido una petición de tipo TAKEOFF para Avión [IBE-001 - TAKEOFF_REQUESTED]
+Torre de control
+  Procesando petición de despegue de Avión [IBE-001 - TAKEOFF_REQUESTED]
+Torre de control
+  Pista [PIS1] pasa a estar ocupada por el avión IBE-001
+Torre de control
+  Avión [IBE-001] autorizado para despegar en Pista [PIS1]
+Panel de vuelos
+  Flight: IBE-001 Status: TAKEOFF_ASSIGNED
+Torre de control
+  Operario [OP-001] ha completado la petición de tipo TAKEOFF para Avión [IBE-001 - TAKEOFF_ASSIGNED]
+Aviones
+  Avión [IBE-001 - TAKEOFF_ASSIGNED] Me ha tocado despegar en la Pista [PIS1]
+Aviones
+  Avión [IBE-001 - DEPARTING] Despegando (100ms)...
+Torre de control
+  Recibida la notificación de que ha despegado para Avión [IBE-001 - DEPARTING]
+Torre de control
+  Operario [OP-001] ha cogido una petición de tipo DEPARTED para Avión [IBE-001 - DEPARTING]
+Torre de control
+  Procesando notificación de despegue de Avión [IBE-001 - DEPARTING]
+Torre de control
+  Pista [PIS1] se libera
+Panel de vuelos
+  Flight: IBE-001 Status: DEPARTED
+Torre de control
+  Operario [OP-001] ha completado la petición de tipo DEPARTED para Avión [IBE-001 - DEPARTED]
+Aviones
+  Avión [IBE-001 - DEPARTED] Completó ciclo en 295 ms
+
+--- Iniciando secuencia para RYR-002 ---
+Aviones
+  Avión [RYR-002 - IN_FLIGHT] Inicia ciclo
+Aviones
+  Avión [RYR-002 - IN_FLIGHT] Solicita aterrizaje a torre de control
+Torre de control
+  Recibida la solicitud de aterrizaje de Avión [RYR-002 - LANDING_REQUEST]
+Torre de control
+  Operario [OP-001] ha cogido una petición de tipo LANDING para Avión [RYR-002 - LANDING_REQUEST]
+Torre de control
+  Procesando petición de aterrizaje de Avión [RYR-002-LANDING_REQUEST]
+Torre de control
+  Pista [PIS1] pasa a estar ocupada por el avión RYR-002
+Torre de control
+  Puerta [PUE1] pasa a estar ocupada por el avión RYR-002
+Torre de control
+  Avión [RYR-002] autorizado para aterrizar en Pista [PIS1]
+Torre de control
+  Avión [RYR-002] autorizado para embarcar en Puerta [PUE1]
+Panel de vuelos
+  Flight: RYR-002 Status: LANDING_ASSIGNED
+Torre de control
+  Operario [OP-001] ha completado la petición de tipo LANDING para Avión [RYR-002 - LANDING_ASSIGNED]
+Aviones
+  Avión [RYR-002 - LANDING_ASSIGNED] Me ha tocado aterrizar en la Pista [PIS1]
+Aviones
+  Avión [RYR-002 - LANDING_ASSIGNED] Me ha tocado embarcar en la Puerta [PUE1]
+Aviones
+  Avión [RYR-002 - LANDING] Aterrizando (100ms)...
+Torre de control
+  Recibida la notificación de aterrizaje de Avión [RYR-002 - LANDING]
+Torre de control
+  Operario [OP-001] ha cogido una petición de tipo LANDED para Avión [RYR-002 - LANDING]
+Torre de control
+  Procesando notificación de aterrizaje de Avión [RYR-002 - LANDING]
+Torre de control
+  Pista [PIS1] se libera
+Panel de vuelos
+  Flight: RYR-002 Status: LANDED
+Torre de control
+  Operario [OP-001] ha completado la petición de tipo LANDED para Avión [RYR-002 - LANDED]
+Torre de control
+  Recibida notificación de inicio embarque RYR-002
+Torre de control
+  Operario [OP-001] ha cogido una petición de tipo BOARDING para Avión [RYR-002 - LANDED]
+Panel de vuelos
+  Flight: RYR-002 Status: BOARDING
+Torre de control
+  Operario [OP-001] ha completado la petición de tipo BOARDING para Avión [RYR-002 - BOARDING]
+Aviones
+  Avión [RYR-002 - BOARDING] Embarcando pasajeros...
+Torre de control
+  Recibida la notificación de finalizacion de embarque de Avión [RYR-002-BOARDING]
+Torre de control
+  Operario [OP-001] ha cogido una petición de tipo BOARDED para Avión [RYR-002 - BOARDING]
+Torre de control
+  Procesando notificación de finalización de embarque de Avión [RYR-002 - BOARDING]
+Torre de control
+  Puerta [PUE1] se libera
+Panel de vuelos
+  Flight: RYR-002 Status: BOARDED
+Torre de control
+  Operario [OP-001] ha completado la petición de tipo BOARDED para Avión [RYR-002 - BOARDED]
+Aviones
+  Avión [RYR-002 - TAKEOFF_REQUESTED] Solicitud de despegue en cola
+Torre de control
+  Recibida la solicitud de despegue para Avión [RYR-002 - TAKEOFF_REQUESTED]
+Torre de control
+  Operario [OP-001] ha cogido una petición de tipo TAKEOFF para Avión [RYR-002 - TAKEOFF_REQUESTED]
+Torre de control
+  Procesando petición de despegue de Avión [RYR-002 - TAKEOFF_REQUESTED]
+Torre de control
+  Pista [PIS1] pasa a estar ocupada por el avión RYR-002
+Torre de control
+  Avión [RYR-002] autorizado para despegar en Pista [PIS1]
+Panel de vuelos
+  Flight: RYR-002 Status: TAKEOFF_ASSIGNED
+Torre de control
+  Operario [OP-001] ha completado la petición de tipo TAKEOFF para Avión [RYR-002 - TAKEOFF_ASSIGNED]
+Aviones
+  Avión [RYR-002 - TAKEOFF_ASSIGNED] Me ha tocado despegar en la Pista [PIS1]
+Aviones
+  Avión [RYR-002 - DEPARTING] Despegando (100ms)...
+Torre de control
+  Recibida la notificación de que ha despegado para Avión [RYR-002 - DEPARTING]
+Torre de control
+  Operario [OP-001] ha cogido una petición de tipo DEPARTED para Avión [RYR-002 - DEPARTING]
+Torre de control
+  Procesando notificación de despegue de Avión [RYR-002 - DEPARTING]
+Torre de control
+  Pista [PIS1] se libera
+Panel de vuelos
+  Flight: RYR-002 Status: DEPARTED
+Torre de control
+  Operario [OP-001] ha completado la petición de tipo DEPARTED para Avión [RYR-002 - DEPARTED]
+Aviones
+  Avión [RYR-002 - DEPARTED] Completó ciclo en 284 ms
+
+=== FIN DE LA SIMULACIÓN ===

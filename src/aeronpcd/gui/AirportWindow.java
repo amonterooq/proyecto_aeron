@@ -5,32 +5,50 @@ import java.awt.*;
 
 public class AirportWindow extends JFrame {
     private JTextArea logArea;
+    private JTextPane stateArea;
 
     public AirportWindow() {
-        super("Aeropuerto AERON - Monitor de Estado");
+        super("Aeropuerto AERON - Monitor de Estado y Recursos");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setSize(800, 600);
-        this.setLayout(new BorderLayout());
+        this.setSize(1200, 700);
+        this.setLayout(new GridLayout(1, 2));
 
-        // Área de texto para mostrar eventos y estado
+        // --- Panel Izquierdo: LOGS ---
         logArea = new JTextArea();
         logArea.setEditable(false);
         logArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
         logArea.setBackground(new Color(30, 30, 30));
         logArea.setForeground(Color.GREEN);
 
-        JScrollPane scrollPane = new JScrollPane(logArea);
-        this.add(scrollPane, BorderLayout.CENTER);
+        JScrollPane scrollLog = new JScrollPane(logArea);
+        scrollLog.setBorder(BorderFactory.createTitledBorder("Registro de Eventos"));
+        this.add(scrollLog);
+
+        // --- Panel Derecho: ESTADO (HTML NATIVO) ---
+        stateArea = new JTextPane();
+        stateArea.setEditable(false);
+        stateArea.setContentType("text/html"); // Importante: interpreta HTML
+        stateArea.setBackground(new Color(10, 10, 40));
+
+        JScrollPane scrollState = new JScrollPane(stateArea);
+        scrollState.setBorder(BorderFactory.createTitledBorder("Estado del Aeropuerto"));
+        this.add(scrollState);
 
         this.setVisible(true);
     }
 
-    // Método para añadir texto a la ventana desde cualquier parte del programa
     public void appendLog(String text) {
         SwingUtilities.invokeLater(() -> {
             logArea.append(text + "\n");
-            // Auto-scroll hacia abajo
             logArea.setCaretPosition(logArea.getDocument().getLength());
+        });
+    }
+
+    public void updateState(String htmlContent) {
+        SwingUtilities.invokeLater(() -> {
+            // Ya recibimos HTML puro, lo pintamos directamente
+            stateArea.setText(htmlContent);
+            stateArea.setCaretPosition(0);
         });
     }
 }
