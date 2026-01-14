@@ -1,20 +1,40 @@
 package aeronpcd.model;
 
-// Clase que representa un mensaje/petición entre el Avión y la Torre
+/**
+ * Representa una solicitud de servicio enviada por un Avión a la Torre de
+ * Control.
+ * Encapsula el avión que realiza la petición y el tipo de operación requerida.
+ * Este objeto se encola en la lista de espera de la Torre.
+ */
 public class Request {
-    // Definimos los tipos de petición que la torre sabe procesar
+
+    /**
+     * Enumerado con los tipos de peticiones posibles en el ciclo de vida del vuelo.
+     */
     public enum Type {
-        LANDING, // Petición para aterrizar
-        LANDED, // Notificación de que ha terminado de aterrizar
-        BOARDING, // Notificación de inicio de embarque
-        BOARDED, // Notificación de fin de embarque
-        TAKEOFF, // Petición para despegar
-        DEPARTED // Notificación de que ha salido del sistema
+        /** Solicitud para aterrizar (Requiere Pista y Puerta) */
+        LANDING,
+        /** Notificación de fin de aterrizaje (Libera Pista) */
+        LANDED,
+        /** Notificación de inicio de embarque */
+        BOARDING,
+        /** Notificación de fin de embarque (Libera Puerta) */
+        BOARDED,
+        /** Solicitud para despegar (Requiere Pista) */
+        TAKEOFF,
+        /** Notificación de fin de despegue (Libera Pista) y salida del sistema */
+        DEPARTED
     }
 
     private Airplane plane;
     private Type type;
 
+    /**
+     * Constructor de una nueva petición.
+     * 
+     * @param plane El avión que genera la solicitud.
+     * @param type  El tipo de acción que solicita u operación que notifica.
+     */
     public Request(Airplane plane, Type type) {
         this.plane = plane;
         this.type = type;
@@ -30,7 +50,6 @@ public class Request {
 
     @Override
     public String toString() {
-        // CORREGIDO: getFlightId()
         return type + " -> " + plane.getFlightId();
     }
 }

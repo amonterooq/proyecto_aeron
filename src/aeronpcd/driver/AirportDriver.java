@@ -177,7 +177,7 @@ public class AirportDriver {
 
         try (FileWriter writer = new FileWriter(fileName)) {
             // Cabecera del CSV
-            writer.write("Avión;Tiempo total (ms);Observaciones\n");
+            writer.write("Avión;Tiempo total (ms);Ranking\n");
 
             int rank = 1;
             for (Airplane plane : airplanes) {
