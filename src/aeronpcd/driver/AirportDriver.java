@@ -147,26 +147,11 @@ public class AirportDriver {
         System.out.println(String.format("%-10s %-15s %s", "AVIÓN", "TIEMPO (ms)", "POS"));
         System.out.println("------------------------------------");
         // Mostramos solo los 5 primeros para no saturar
-        airplanes.stream()
-                .sorted(Comparator.comparingLong(Airplane::getTotalTime))
-                .limit(5)
-                .forEach(p -> System.out.println(
-                        String.format("%-10s %-15d %dº",
-                                p.getFlightId(), p.getTotalTime(), airplanes.indexOf(p) + 1) // Nota: indexOf no es
-                                                                                             // eficiente en stream pero
-                                                                                             // es solo mostrar 5
-                ));
-
-        // Recalculamos ranking real para mostrar
-        int rank = 1;
-        // Solo para mostrar el texto correctamente sin re-stream
-        for (Airplane p : airplanes) {
-            if (rank > 5)
-                break;
-            // Ya está ordenado por generateCSV
-            // Redundante pero simple para asegurar orden final en consola
-            // (generateCSV ordena la lista 'airplanes' in-place)
-            // Simplemente imprimimos la tabla limpia en el siguiente paso si preferimos.
+        // OPTIMIZACIÓN: Iteración simple sobre lista ya ordenada, O(1) para top 5
+        for (int i = 0; i < Math.min(5, airplanes.size()); i++) {
+            Airplane p = airplanes.get(i);
+            System.out.println(String.format("%-10s %-15d %dº",
+                    p.getFlightId(), p.getTotalTime(), i + 1));
         }
 
         scanner.close();

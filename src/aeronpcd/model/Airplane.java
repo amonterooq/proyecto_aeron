@@ -131,8 +131,12 @@ public class Airplane extends Thread {
         this.status = tempStatus;
         Logger.log("Avión [" + flightId + " - " + status + "] " + actionName + " (" + time + "ms)...");
         try {
+            // Simulamos la duración de la operación (aterrizaje/despegue)
             Thread.sleep(time);
         } catch (InterruptedException e) {
+            Logger.log("Avión [" + flightId + "] Interrumpido durante acción: " + actionName);
+            // Reestablecemos el estado de interrupción por buenas prácticas
+            Thread.currentThread().interrupt();
         }
     }
 
