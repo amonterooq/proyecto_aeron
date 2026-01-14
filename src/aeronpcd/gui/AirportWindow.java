@@ -37,6 +37,10 @@ public class AirportWindow extends JFrame {
         this.add(scrollState);
 
         this.setVisible(true);
+        
+        // PRÁCTICA 7: Forzar que la ventana tome el foco y aparezca al frente automáticamente
+        this.toFront();
+        this.requestFocus();
     }
 
     public void appendLog(String text) {

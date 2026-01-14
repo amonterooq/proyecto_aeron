@@ -62,8 +62,20 @@ public class ControlTower {
                         + request.getType() + " del avión " + request.getPlane().getFlightId());
             }
 
-            // Añadimos a la cola (estructura compartida)
-            requestQueue.add(request);
+            // OPTIMIZACIÓN PRÁCTICA 7: Prioridad de mensajes
+            // Las peticiones que liberan recursos deben procesarse ANTES para evitar atascos (Starvation)
+            // LANDED -> Libera Pista
+            // BOARDED -> Libera Puerta
+            // DEPARTED -> Libera Pista
+            if (request.getType() == Request.Type.LANDED || 
+                request.getType() == Request.Type.BOARDED || 
+                request.getType() == Request.Type.DEPARTED) {
+                
+                requestQueue.addFirst(request); // Prioridad Alta
+                // log("Torre (Debug)", "Priorizando " + request.getType());
+            } else {
+                requestQueue.addLast(request); // Prioridad Normal (LANDING, TAKEOFF, etc.)
+            }
 
             log("Torre de control",
                     "Recibida solicitud " + request.getType() + " de Avión [" + request.getPlane().getFlightId() + "]");

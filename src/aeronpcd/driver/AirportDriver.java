@@ -73,6 +73,9 @@ public class AirportDriver {
         }
 
         Logger.setup(logName);
+        // Configuramos también el Panel de Vuelos para que use un JSON distinto
+         aeronpcd.util.FlightPanel.setup(modo);
+
         Logger.log("=== INICIO SIMULACIÓN (" + modo + ") ===");
         Logger.log("Configuración: " + numAviones + " Aviones, " + numPistas + " Pistas, " +
                 numPuertas + " Puertas, " + numOperarios + " Operarios.");
@@ -107,17 +110,26 @@ public class AirportDriver {
             }
         } else {
             // Modo Concurrente: Todos a la vez
+            System.out.println("Lanzando " + numAviones + " aviones en paralelo...");
             for (Airplane plane : airplanes) {
                 plane.start();
             }
-            // Esperar a que terminen (Join)
+            
+            // Esperar a que terminen (Join) con feedback visual
+            System.out.println("Esperando finalización de vuelos...");
+            int finalizados = 0;
             for (Airplane plane : airplanes) {
                 try {
                     plane.join();
+                    finalizados++;
+                    if (finalizados % 5 == 0 || finalizados == numAviones) {
+                        System.out.println("Progreso: " + finalizados + "/" + numAviones + " aviones finalizados.");
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
+            System.out.println("Todos los aviones han aterrizado y despegado.");
         }
 
         long simulationEnd = System.currentTimeMillis();
@@ -128,9 +140,12 @@ public class AirportDriver {
         Logger.close(); // Cerramos el fichero de log de forma limpia
 
         // 6. GENERAR CSV (Práctica 6: Resultados y archivo de salida)
-        generateCSV(airplanes);
+        generateCSV(airplanes, modo);
 
         scanner.close();
+
+        System.out.println("Simulación finalizada con éxito. Cerrando aplicación...");
+        System.exit(0);
     }
 
     /**
@@ -138,9 +153,12 @@ public class AirportDriver {
      * Ordena los aviones por tiempo total de menor a mayor y genera un ranking.
      * 
      * @param airplanes Lista de aviones que han completado (o intentado) la simulación.
+     * @param modo Modo de ejecución para generar el nombre del archivo.
      */
-    private static void generateCSV(List<Airplane> airplanes) {
-        String fileName = "aeropuerto_resumen.csv";
+    private static void generateCSV(List<Airplane> airplanes, String modo) {
+        // Se guarda dentro de la carpeta logs/secuencial o logs/concurrente
+        String fileName = "logs/" + modo.toLowerCase() + "/aeropuerto_resumen.csv";
+        
         // Ordenamos la lista de aviones por su tiempo total de operación (ascendente)
         airplanes.sort(Comparator.comparingLong(Airplane::getTotalTime));
 

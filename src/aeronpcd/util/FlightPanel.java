@@ -7,7 +7,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class FlightPanel {
     private static final Map<String, String> flights = new ConcurrentHashMap<>();
-    private static final String FILE_PATH = "flight_board.json";
+    private static String filePath = "flight_board.json"; // Ya no es final, configurable
+
+    /**
+     * Configura el nombre del archivo JSON según el modo de ejecución.
+     * @param mode Modo de ejecución (SECUENCIAL o CONCURRENTE)
+     */
+    public static void setup(String mode) {
+        // Se guarda dentro de la carpeta logs/secuencial o logs/concurrente
+        filePath = "logs/" + mode.toLowerCase() + "/flight_board.json";
+    }
 
     /**
      * Actualiza el estado de un vuelo en memoria y persiste el cambio en el fichero JSON.
@@ -38,7 +47,7 @@ public class FlightPanel {
         }
         json.append("}");
 
-        try (FileWriter writer = new FileWriter(FILE_PATH)) {
+        try (FileWriter writer = new FileWriter(filePath)) {
             writer.write(json.toString());
         } catch (IOException e) {
             // REQUISITO PRÁCTICA 6: Captura de excepción de Panel
