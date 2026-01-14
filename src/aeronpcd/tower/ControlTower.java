@@ -249,7 +249,8 @@ public class ControlTower {
     }
 
     private void log(String section, String msg) {
-        String fullMsg = section + "\n  " + msg;
+        // Formato simplificado en una sola línea
+        String fullMsg = String.format("[%s] %s", section, msg);
         Logger.log(fullMsg);
         if (window != null)
             window.appendLog(fullMsg);

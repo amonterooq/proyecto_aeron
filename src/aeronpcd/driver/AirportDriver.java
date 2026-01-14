@@ -67,9 +67,17 @@ public class AirportDriver {
 
         // 2. CONFIGURACIÓN DEL NOMBRE DEL LOG (Requisito estricto)
         String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        
         // Formato: aeron-MODE-N1AV-N2PIS-N3PUE[-N4OPE-]-TIMESTAMP
-        String logName = String.format("aeron-%s-%d-%d-%d-%d-%s",
-                modo, numAviones, numPistas, numPuertas, numOperarios, timeStamp);
+        String logName;
+        if (modo.equals("CONCURRENTE")) {
+            logName = String.format("aeron-%s-%d-%d-%d-%d-%s",
+                    modo, numAviones, numPistas, numPuertas, numOperarios, timeStamp);
+        } else {
+            // En secuencial no incluimos el número de operarios en el nombre
+            logName = String.format("aeron-%s-%d-%d-%d-%s",
+                    modo, numAviones, numPistas, numPuertas, timeStamp);
+        }
 
         Logger.setup(logName);
         Logger.log("=== INICIO SIMULACIÓN (" + modo + ") ===");
