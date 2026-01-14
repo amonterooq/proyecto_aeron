@@ -5,6 +5,7 @@ import aeronpcd.model.Airplane;
 import aeronpcd.resources.Gate;
 import aeronpcd.resources.Runway;
 import aeronpcd.tower.ControlTower;
+import aeronpcd.util.FlightPanel;
 import aeronpcd.util.Logger;
 
 import java.io.FileWriter;
@@ -16,6 +17,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Clase principal (Driver) del simulador de aeropuerto AERON.
+ * 
+ * Responsabilidades:
+ * 1. Configuración de la simulación (Modo, número de recursos).
+ * 2. Inicialización de componentes (Ventana, Torre, Logs).
+ * 3. Orquestación de la ejecución (Secuencial o Concurrente).
+ * 4. Generación de informes finales (CSV y Ranking en consola).
+ */
 public class AirportDriver {
 
     public static void main(String[] args) {
@@ -74,7 +84,7 @@ public class AirportDriver {
 
         Logger.setup(logName);
         // Configuramos también el Panel de Vuelos para que use un JSON distinto
-        aeronpcd.util.FlightPanel.setup(modo);
+        FlightPanel.setup(modo);
 
         Logger.log("=== INICIO SIMULACIÓN (" + modo + ") ===");
         Logger.log("Configuración: " + numAviones + " Aviones, " + numPistas + " Pistas, " +
@@ -109,13 +119,14 @@ public class AirportDriver {
                 plane.runSequential();
             }
         } else {
-            // Modo Concurrente: Todos a la vez
+            // Modo Concurrente: Todos a la vez.
+            // Los aviones son hilos (extends Thread)
             System.out.println("Lanzando " + numAviones + " aviones en paralelo...");
             for (Airplane plane : airplanes) {
                 plane.start();
             }
 
-            // Esperar a que terminen (Join) con feedback visual
+            // JOIN: Esperar a que terminen con feedback visual de progreso
             System.out.println("Esperando finalización de vuelos...");
             int finalizados = 0;
             for (Airplane plane : airplanes) {
@@ -126,7 +137,7 @@ public class AirportDriver {
                         System.out.println("Progreso: " + finalizados + "/" + numAviones + " aviones finalizados.");
                     }
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Logger.log("Driver interrumpido mientras esperaba al avión " + plane.getName());
                 }
             }
             System.out.println("Todos los aviones han aterrizado y despegado.");

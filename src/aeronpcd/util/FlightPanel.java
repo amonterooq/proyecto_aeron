@@ -5,17 +5,31 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Simula un Panel de Información de Vuelos (FIDS - Flight Information Display
+ * System).
+ * Mantiene un registro en tiempo real de los estados de cada vuelo y los
+ * persiste
+ * en un archivo JSON para que puedan ser consumidos por otros sistemas o
+ * visualizadores externos.
+ * 
+ * Es una clase de utilidad estática (Singleton implícito).
+ */
 public class FlightPanel {
+    // Mapa Thread-Safe para almacenar el estado de cada vuelo (ID -> Estado)
     private static final Map<String, String> flights = new ConcurrentHashMap<>();
-    private static String filePath = "flight_board.json"; // Ya no es final, configurable
+
+    // Ruta del archivo JSON, configurable según el modo de la simulación
+    private static String filePath = "flight_board.json";
 
     /**
-     * Configura el nombre del archivo JSON según el modo de ejecución.
+     * Configura el nombre del archivo JSON y su ubicación según el modo.
      * 
-     * @param mode Modo de ejecución (SECUENCIAL o CONCURRENTE)
+     * @param mode Modo de ejecución (SECUENCIAL o CONCURRENTE).
      */
     public static void setup(String mode) {
-        // Se guarda dentro de la carpeta logs/secuencial o logs/concurrente
+        // Se guarda dentro de la carpeta logs/secuencial o logs/concurrente para
+        // organización
         filePath = "logs/" + mode.toLowerCase() + "/flight_board.json";
     }
 
