@@ -3,42 +3,49 @@ package aeronpcd.util;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Logger {
     private static PrintWriter fileWriter;
 
-    // Inicializa el logger creando el fichero con el timestamp actual
-    public static void setup(String mode) {
-        String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        // Formato: logs/secuencial/aeron-secuencial-[time].log
-        String fileName = "logs/" + mode.toLowerCase() + "/aeron-" + mode.toLowerCase() + "-" + timeStamp + ".log";
+    // Configura el log al inicio (crea carpeta y fichero con timestamp)
+    public static void setup(String fullLogName) {
+        // Creamos carpeta logs si no existe
+        String directoryPath = "logs";
+        new java.io.File(directoryPath).mkdirs();
+
+        // El driver ya nos pasa el nombre con formato correcto + timestamp
+        String fileName = directoryPath + "/" + fullLogName + ".log";
 
         try {
             fileWriter = new PrintWriter(new FileWriter(fileName, true));
             System.out.println("Log iniciado en: " + fileName);
         } catch (IOException e) {
-            System.err.println("Error creando el fichero de log: " + e.getMessage());
+            System.err.println("Error: No se ha encontrado el archivo de log " + fileName);
         }
     }
 
-    // Método para escribir eventos
+    // Método estático para escribir en consola y fichero a la vez
     public static void log(String message) {
-        // Escribir en consola
-        System.out.println(message);
+        // PRÁCTICA 7: Añadir timestamp preciso a cada línea
+        String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS"));
+        String threadName = Thread.currentThread().getName();
 
-        // Escribir en fichero si está inicializado
+        // Formato: [HORA] [HILO] Mensaje
+        String formattedMessage = String.format("[%s] [%-10s] %s", time, threadName, message);
+
+        System.out.println(formattedMessage);
+
         if (fileWriter != null) {
-            fileWriter.println(message);
-            fileWriter.flush(); // Forzar escritura inmediata
+            fileWriter.println(formattedMessage);
+            fileWriter.flush();
         }
     }
 
-    // Cerrar el fichero al final
     public static void close() {
-        if (fileWriter != null) {
+        if (fileWriter != null)
             fileWriter.close();
-        }
     }
 }

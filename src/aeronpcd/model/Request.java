@@ -1,14 +1,10 @@
 package aeronpcd.model;
 
+// Clase que representa un mensaje/petición entre el Avión y la Torre
 public class Request {
-    // Definimos los tipos de petición que la torre sabe procesar
+    // Tipos de mensajes posibles
     public enum Type {
-        LANDING, // Petición para aterrizar
-        LANDED, // Notificación de que ha terminado de aterrizar
-        BOARDING, // Notificación de inicio de embarque
-        BOARDED, // Notificación de fin de embarque
-        TAKEOFF, // Petición para despegar
-        DEPARTED // Notificación de que ha salido del sistema
+        LANDING, LANDED, BOARDING, BOARDED, TAKEOFF, DEPARTED
     }
 
     private Airplane plane;
@@ -29,6 +25,7 @@ public class Request {
 
     @Override
     public String toString() {
-        return type + " -> " + plane.getId();
+        // CORREGIDO: getFlightId()
+        return type + " -> " + plane.getFlightId();
     }
 }

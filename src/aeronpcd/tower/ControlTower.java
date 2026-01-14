@@ -6,7 +6,7 @@ import aeronpcd.model.Request;
 import aeronpcd.resources.Gate;
 import aeronpcd.resources.Runway;
 import aeronpcd.util.AirportState;
-import aeronpcd.util.FlightPanel; // <--- Importamos el nuevo panel
+import aeronpcd.util.FlightPanel;
 import aeronpcd.util.Logger;
 import aeronpcd.gui.AirportWindow;
 
@@ -14,18 +14,26 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ControlTower {
+    // Recursos del aeropuerto
     private List<Runway> runways;
     private List<Gate> gates;
     private AirportWindow window;
 
+    // Cola de peticiones compartida
     private LinkedList<Request> requestQueue;
+
+    // PRÁCTICA 3: Array de hilos operarios
     private Operator[] operators;
+
+    // PRÁCTICA 6: Límite de cola para detectar saturación
+    private static final int MAX_QUEUE_SIZE = 15;
 
     public ControlTower(List<Runway> runways, List<Gate> gates) {
         this.runways = runways;
         this.gates = gates;
         this.requestQueue = new LinkedList<>();
 
+        // Inicializamos y arrancamos los 5 operarios al crear la torre
         this.operators = new Operator[5];
         for (int i = 0; i < 5; i++) {
             operators[i] = new Operator("OP-" + (i + 1));
@@ -35,65 +43,91 @@ public class ControlTower {
 
     public void setWindow(AirportWindow window) {
         this.window = window;
-        updateVisualization();
+        updateVisualization(); // Pintar estado inicial
     }
 
+    // --- MÉTODO DE ENTRADA DE PETICIONES (Thread-Safe) ---
     public void addRequest(Request request) {
         synchronized (requestQueue) {
+            // PRÁCTICA 6: Comprobación de saturación
+            if (requestQueue.size() >= MAX_QUEUE_SIZE) {
+                System.err.println("Cola de peticiones completa, reintentando más tarde petición "
+                        + request.getType() + " del avión " + request.getPlane().getFlightId());
+            }
+
+            // Añadimos a la cola
             requestQueue.add(request);
+
             log("Torre de control",
-                    "Recibida solicitud " + request.getType() + " de Avión [" + request.getPlane().getId() + "]");
+                    "Recibida solicitud " + request.getType() + " de Avión [" + request.getPlane().getFlightId() + "]");
+
+            // Actualizamos la ventana gráfica
             updateVisualization();
+
+            // Despertamos a cualquier operario que esté durmiendo esperando trabajo
             requestQueue.notifyAll();
         }
     }
 
+    // --- CLASE INTERNA: EL OPERARIO (Hilo Trabajador) ---
     private class Operator extends Thread {
         public Operator(String name) {
             setName(name);
-            setDaemon(true);
+            setDaemon(true); // Se cierra automáticamente cuando termina el main
         }
 
         @Override
         public void run() {
             while (true) {
                 Request req;
+
+                // 1. INTENTAR COGER PETICIÓN DE LA COLA
                 synchronized (requestQueue) {
                     while (requestQueue.isEmpty()) {
                         try {
+                            // Si no hay trabajo, dormimos
                             requestQueue.wait();
                         } catch (InterruptedException e) {
-                            return;
+                            return; // Salir si nos interrumpen
                         }
                     }
+                    // Sacamos la primera petición (FIFO)
                     req = requestQueue.poll();
                     updateVisualization();
                 }
 
-                log("Torre de control",
-                        "Operario [" + getName() + "] atiende " + req.getType() + " para " + req.getPlane().getId());
+                log("Torre de control", "Operario [" + getName() + "] atiende " + req.getType() + " para "
+                        + req.getPlane().getFlightId());
 
+                // Simulamos tiempo de gestión (papeleo)
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                 }
 
+                // 2. PROCESAR LA PETICIÓN Y ASIGNAR RECURSOS
                 boolean success = processRequestLogic(req);
 
+                // 3. RESPUESTA
                 if (success) {
                     log("Torre de control", "Operario [" + getName() + "] FINALIZÓ " + req.getType() + " para "
-                            + req.getPlane().getId());
+                            + req.getPlane().getFlightId());
+
+                    // Despertamos al avión específico que hizo la petición
                     synchronized (req.getPlane()) {
                         req.getPlane().notify();
                     }
                 } else {
-                    log("Torre de control", "Operario [" + getName() + "] RE-ENCOLA " + req.getType() + " para "
-                            + req.getPlane().getId() + " (Sin Recursos)");
+                    // PRÁCTICA 4/6: Si no hay recursos, no descartamos, re-encolamos
+                    log("Torre de control", "Operario [" + getName() + "] RE-ENCOLA " + req.getType()
+                            + " (Sin Recursos) para " + req.getPlane().getFlightId());
+
                     synchronized (requestQueue) {
                         requestQueue.add(req);
                         updateVisualization();
                         requestQueue.notifyAll();
                     }
+                    // Pequeña espera para no saturar la CPU rebotando la petición
                     try {
                         Thread.sleep(200);
                     } catch (InterruptedException e) {
@@ -103,14 +137,16 @@ public class ControlTower {
         }
     }
 
-    // --- LÓGICA CON ACTUALIZACIÓN DEL JSON ---
+    // --- LÓGICA DE ASIGNACIÓN DE RECURSOS ---
     private boolean processRequestLogic(Request req) {
         Airplane plane = req.getPlane();
-        String planeId = plane.getId();
+        String planeId = plane.getFlightId(); // Usamos getFlightId corregido
 
+        // Sincronizamos la Torre para que la asignación de pistas sea atómica
         synchronized (this) {
             switch (req.getType()) {
                 case LANDING:
+                    // REQUISITO: Necesita Pista Y Puerta libres
                     Runway r = getFreeRunway();
                     Gate g = getFreeGate();
 
@@ -121,81 +157,64 @@ public class ControlTower {
                         plane.setStatus(FlightStatus.LANDING_ASSIGNED);
                         plane.setResources(r, g);
 
-                        // ACTUALIZAR JSON
+                        // PRÁCTICA 5: Actualizar JSON persistente
                         FlightPanel.updateStatus(planeId, "LANDING_ASSIGNED");
 
                         log("Torre de control",
                                 "Asignados: Pista " + r.getId() + " y Puerta " + g.getId() + " a " + planeId);
                         updateVisualization();
                         return true;
-                    } else {
-                        return false;
                     }
+                    return false; // Fallo por falta de recursos
 
                 case LANDED:
+                    // El avión ha aterrizado, liberamos la Pista
                     if (plane.getCurrentRunway() != null) {
                         plane.getCurrentRunway().free();
-                        log("Torre de control",
-                                "Pista [" + plane.getCurrentRunway().getId() + "] liberada por " + planeId);
                     }
                     plane.setStatus(FlightStatus.LANDED);
-
-                    // ACTUALIZAR JSON
                     FlightPanel.updateStatus(planeId, "LANDED");
-
                     updateVisualization();
                     return true;
 
                 case BOARDING:
+                    // Solo cambio de estado
                     plane.setStatus(FlightStatus.BOARDING);
-
-                    // ACTUALIZAR JSON
                     FlightPanel.updateStatus(planeId, "BOARDING");
-
                     return true;
 
                 case BOARDED:
+                    // El avión ha terminado el embarque, liberamos la Puerta
                     if (plane.getCurrentGate() != null) {
                         plane.getCurrentGate().free();
-                        log("Torre de control",
-                                "Puerta [" + plane.getCurrentGate().getId() + "] liberada por " + planeId);
                     }
                     plane.setStatus(FlightStatus.BOARDED);
-
-                    // ACTUALIZAR JSON
                     FlightPanel.updateStatus(planeId, "BOARDED");
-
                     updateVisualization();
                     return true;
 
                 case TAKEOFF:
+                    // REQUISITO: Necesita una pista nueva para despegar
                     Runway rTakeoff = getFreeRunway();
                     if (rTakeoff != null) {
                         rTakeoff.occupy(planeId);
                         plane.setStatus(FlightStatus.TAKEOFF_ASSIGNED);
                         plane.setTakeoffRunway(rTakeoff);
 
-                        // ACTUALIZAR JSON
                         FlightPanel.updateStatus(planeId, "TAKEOFF_ASSIGNED");
-
                         log("Torre de control", "Asignada Pista " + rTakeoff.getId() + " para despegue de " + planeId);
                         updateVisualization();
                         return true;
-                    } else {
-                        return false;
                     }
+                    return false; // Fallo por falta de pista
 
                 case DEPARTED:
+                    // El avión se ha ido, liberamos la pista de despegue
                     if (plane.getCurrentRunway() != null) {
                         plane.getCurrentRunway().free();
-                        log("Torre de control", "Pista [" + plane.getCurrentRunway().getId() + "] liberada (Fin ciclo "
-                                + planeId + ")");
                     }
                     plane.setStatus(FlightStatus.DEPARTED);
-
-                    // ACTUALIZAR JSON
                     FlightPanel.updateStatus(planeId, "DEPARTED");
-
                     updateVisualization();
                     return true;
             }
@@ -203,6 +222,7 @@ public class ControlTower {
         return true;
     }
 
+    // Actualiza la ventana gráfica llamando al generador de HTML
     private void updateVisualization() {
         if (window != null) {
             String htmlState;
@@ -213,6 +233,7 @@ public class ControlTower {
         }
     }
 
+    // Helpers para buscar recursos libres
     private Runway getFreeRunway() {
         for (Runway r : runways)
             if (r.isAvailable())

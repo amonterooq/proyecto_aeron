@@ -359,3 +359,71 @@ Con la Práctica 5 completada:
 - [x] Preparación para la integración final y estadísticas.
 
 ---
+
+---
+
+# 🛡️ Práctica 6: Robustez y Reportes Finales
+
+**Entrega:** Práctica 6 - Gestión de Errores y Generación de Informes
+**Objetivo:** Implementar un sistema de captura de excepciones para los problemas comunes del aeropuerto (saturación, fallos de I/O) y generar un informe final de rendimiento en formato CSV.
+
+---
+
+## 📋 1. Gestión de Excepciones
+
+Se han protegido los puntos críticos del sistema capturando las excepciones específicas solicitadas en el enunciado:
+
+1.  **Escritura de Log (`Logger.java`):**
+    * Captura `IOException` al crear el fichero.
+    * Mensaje: *"No se ha encontrado el archivo de log..."*
+2.  **Panel de Vuelos (`FlightPanel.java`):**
+    * Captura fallo al escribir `flight_board.json`.
+    * Mensaje: *"No se ha actualizado el panel de vuelos..."*
+3.  **Saturación de Peticiones (`ControlTower.java`):**
+    * Se ha establecido un límite de seguridad en la cola (`MAX_QUEUE_SIZE = 10`).
+    * Si se supera, se emite error: *"Cola de peticiones completa..."*
+4.  **Asignación de Recursos (`ControlTower.java`):**
+    * Si un operario intenta procesar una petición y no hay recursos, se emite: *"No se ha podido asignar pista/puerta..."*
+5.  **Escritura CSV (`AirportDriver.java`):**
+    * Captura error al guardar el informe final.
+    * Mensaje: *"Error al escribir el resumen de la simulación..."*
+
+---
+
+## 📊 2. Informe de Rendimiento (CSV)
+
+Al finalizar la simulación, el sistema genera automáticamente el archivo `aeropuerto.csv` en la raíz del proyecto.
+
+* **Contenido:** Lista de todos los aviones ordenados por eficiencia (tiempo total de ciclo).
+* **Formato:** `Avión;Tiempo total (ms);Observaciones`
+* **Ejemplo:**
+    ```csv
+    Avión;Tiempo total (ms);Observaciones
+    IBE-002;2850;1º
+    IBE-001;2910;2º
+    IBE-003;3100;3º
+    ...
+    ```
+
+---
+
+## ✅ 3. Conclusión del Proyecto
+
+El sistema AERON ha sido implementado exitosamente cubriendo todas las fases:
+1.  Arquitectura base y Logging.
+2.  Protocolo de estados y comunicación Torre-Avión.
+3.  Concurrencia multihilo (Operarios).
+4.  Gestión eficiente de recursos (Pistas/Puertas) y Visualización GUI.
+5.  Persistencia de datos (JSON).
+6.  Robustez y Reporting (CSV).
+
+---
+
+## 📊 Ejemplo de Salida (CSV)
+
+```csv
+Avión;Tiempo total (ms);Observaciones
+IBE-008;3333;1º
+IBE-003;3342;2º
+IBE-010;3346;3º
+```
