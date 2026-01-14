@@ -27,20 +27,26 @@ public class Logger {
         }
     }
 
-    // Método estático para escribir en consola y fichero a la vez
+    /**
+     * Escribe un mensaje en la salida estándar y en el archivo de log.
+     * Incluye una marca de tiempo y el nombre del hilo que genera el mensaje para facilitar el seguimiento (tracing).
+     * 
+     * @param message El mensaje que se quiere registrar (sin marca de tiempo).
+     */
     public static void log(String message) {
         // PRÁCTICA 7: Añadir timestamp preciso a cada línea
         String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS"));
-        String threadName = Thread.currentThread().getName();
+        String threadName = Thread.currentThread().getName(); // Hilo actual (Avión, Operario o Main)
 
         // Formato: [HORA] [HILO] Mensaje
         String formattedMessage = String.format("[%s] [%-10s] %s", time, threadName, message);
 
-        System.out.println(formattedMessage);
+        System.out.println(formattedMessage); // Salida por consola
 
+        // Escritura en fichero si está abierto
         if (fileWriter != null) {
             fileWriter.println(formattedMessage);
-            fileWriter.flush();
+            fileWriter.flush(); // Fuerza la escritura inmediata en disco para evitar pérdida si el programa falla
         }
     }
 

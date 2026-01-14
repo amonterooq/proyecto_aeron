@@ -33,24 +33,29 @@ public class Airplane extends Thread {
         this.setName(id);
     }
 
-    // PRÁCTICA 7: El método run() es el punto de entrada cuando hacemos
-    // airplane.start()
+    /**
+     * Método principal que ejecuta la lógica concurrente del avión (Práctica 7).
+     * Es el punto de entrada del Hilo cuando se llama a this.start().
+     */
     @Override
     public void run() {
         // Ejecutamos la lógica del ciclo de vida del avión
         runSequential();
     }
 
-    // Lógica completa del ciclo de vida del avión
+    /**
+     * Define el ciclo de vida completo del avión: Aterrizaje -> Embarque -> Despegue.
+     * Este método contiene la secuencia lógica, pero las esperas son gestionadas por monitores.
+     */
     public void runSequential() {
-        this.startTime = System.currentTimeMillis();
+        this.startTime = System.currentTimeMillis(); // Marca de tiempo de inicio
         Logger.log("Avión [" + flightId + " - " + status + "] Inicia ciclo");
 
         // --- FASE 1: ATERRIZAJE ---
         this.status = FlightStatus.LANDING_REQUEST;
         Logger.log("Avión [" + flightId + "] Solicita aterrizaje y ESPERA...");
 
-        // Enviamos petición y nos dormimos (wait) hasta que un operario nos atienda
+        // Enviamos petición a la torre y bloqueamos este hilo (wait()) hasta ser atendidos
         sendRequestAndWait(Request.Type.LANDING);
 
         // Si la torre nos ha asignado recursos (estado cambiado a LANDING_ASSIGNED)
@@ -95,13 +100,19 @@ public class Airplane extends Thread {
         Logger.log("Avión [" + flightId + " - DEPARTED] Ciclo completado en " + getTotalTime() + " ms");
     }
 
-    // Método auxiliar para enviar petición y bloquear el hilo (wait)
+    /**
+     * Envía una petición a la Torre de Control y bloquea el hilo del avión actual.
+     * Patrón de sincronización: Wait-Notify.
+     * El avión espera pasivamente (wait) hasta que la Torre le asigne recursos y le despierte (notify).
+     * 
+     * @param type Tipo de petición (LANDING, TAKEOFF, etc.)
+     */
     private void sendRequestAndWait(Request.Type type) {
         synchronized (this) {
             // Añadimos la petición a la cola de la torre
             tower.addRequest(new Request(this, type));
             try {
-                // El avión se duerme aquí. Despertará cuando el Operario haga plane.notify()
+                // El avión se duerme aquí librando la CPU. Despertará cuando el Operario haga plane.notify()
                 this.wait();
             } catch (InterruptedException e) {
                 Logger.log("Avión [" + flightId + "] Interrumpido mientras esperaba.");

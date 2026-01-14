@@ -47,6 +47,13 @@ public class ControlTower {
     }
 
     // --- MÉTODO DE ENTRADA DE PETICIONES (Thread-Safe) ---
+    /**
+     * Método público para añadir una nueva petición a la cola.
+     * Actúa como Productor en el patrón Productor-Consumidor.
+     * Es invocado por los hilos de los Aviones.
+     * 
+     * @param request La solicitud que envía el avión
+     */
     public void addRequest(Request request) {
         synchronized (requestQueue) {
             // PRÁCTICA 6: Comprobación de saturación
@@ -55,7 +62,7 @@ public class ControlTower {
                         + request.getType() + " del avión " + request.getPlane().getFlightId());
             }
 
-            // Añadimos a la cola
+            // Añadimos a la cola (estructura compartida)
             requestQueue.add(request);
 
             log("Torre de control",
@@ -64,16 +71,21 @@ public class ControlTower {
             // Actualizamos la ventana gráfica
             updateVisualization();
 
-            // Despertamos a cualquier operario que esté durmiendo esperando trabajo
+            // NotifyAll despierta a los operarios que estén esperando (wait) en la cola vacía
             requestQueue.notifyAll();
         }
     }
 
     // --- CLASE INTERNA: EL OPERARIO (Hilo Trabajador) ---
+    /**
+     * Clase que representa a un Operario de la torre.
+     * Funciona como un consumidor en el patrón Productor-Consumidor.
+     * Consume peticiones de la cola compartida 'requestQueue' y las procesa.
+     */
     private class Operator extends Thread {
         public Operator(String name) {
             setName(name);
-            setDaemon(true); // Se cierra automáticamente cuando termina el main
+            setDaemon(true); // Se marca como Daemon para que no impida que la JVM termine si el main acaba
         }
 
         @Override
@@ -81,17 +93,18 @@ public class ControlTower {
             while (true) {
                 Request req;
 
-                // 1. INTENTAR COGER PETICIÓN DE LA COLA
+                // 1. INTENTAR COGER PETICIÓN DE LA COLA (Sección Crítica)
                 synchronized (requestQueue) {
+                    // Si la cola está vacía, el operario espera (wait)
                     while (requestQueue.isEmpty()) {
                         try {
-                            // Si no hay trabajo, dormimos
+                            // Si no hay trabajo, dormimos esperando notificación de nueva petición
                             requestQueue.wait();
                         } catch (InterruptedException e) {
-                            return; // Salir si nos interrumpen
+                            return; // Salir limpio si interrumpen el hilo
                         }
                     }
-                    // Sacamos la primera petición (FIFO)
+                    // Sacamos la primera petición (FIFO) y actualizamos vista
                     req = requestQueue.poll();
                     updateVisualization();
                 }
@@ -138,11 +151,20 @@ public class ControlTower {
     }
 
     // --- LÓGICA DE ASIGNACIÓN DE RECURSOS ---
+    /**
+     * Procesa la lógica de negocio de una petición.
+     * Gestiona la reserva y liberación de recursos compartidos (Pistas y Puertas) de forma atómica.
+     * 
+     * @param req La petición a procesar
+     * @return true si la petición fue satisfecha exitosamente, false si faltan recursos
+     */
     private boolean processRequestLogic(Request req) {
         Airplane plane = req.getPlane();
         String planeId = plane.getFlightId(); // Usamos getFlightId corregido
 
-        // Sincronizamos la Torre para que la asignación de pistas sea atómica
+        // Sincronizamos la Torre (monitor objeto 'this') para garantizar exclusión mutua
+        // al consultar y modificar el estado de pistas y puertas.
+        // Evita condiciones de carrera donde dos aviones cojan la misma pista.
         synchronized (this) {
             switch (req.getType()) {
                 case LANDING:

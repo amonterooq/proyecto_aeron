@@ -128,32 +128,43 @@ public class AirportDriver {
         }
 
         long simulationEnd = System.currentTimeMillis();
-        long totalDuration = simulationEnd - simulationStart;
+        long totalDuration = simulationEnd - simulationStart; // Duración total experimental
 
         Logger.log("=== FIN DE LA SIMULACIÓN ===");
         Logger.log("TIEMPO TOTAL: " + totalDuration + " ms");
-        Logger.close();
+        Logger.close(); // Cerramos el fichero de log de forma limpia
 
-        // 6. GENERAR CSV
+        // 6. GENERAR CSV (Práctica 6: Resultados y archivo de salida)
         generateCSV(airplanes);
 
         scanner.close();
     }
 
+    /**
+     * Genera un archivo CSV con el resumen de la simulación.
+     * Ordena los aviones por tiempo total de menor a mayor y genera un ranking.
+     * 
+     * @param airplanes Lista de aviones que han completado (o intentado) la simulación.
+     */
     private static void generateCSV(List<Airplane> airplanes) {
         String fileName = "aeropuerto_resumen.csv";
+        // Ordenamos la lista de aviones por su tiempo total de operación (ascendente)
         airplanes.sort(Comparator.comparingLong(Airplane::getTotalTime));
 
         try (FileWriter writer = new FileWriter(fileName)) {
+            // Cabecera del CSV
             writer.write("Avión;Tiempo total (ms);Observaciones\n");
+            
             int rank = 1;
             for (Airplane plane : airplanes) {
+                // Escribe una fila por avión: ID, Tiempo Total, Posición en el ranking
                 writer.write(String.format("%s;%d;%dº\n",
                         plane.getFlightId(), plane.getTotalTime(), rank));
                 rank++;
             }
             System.out.println("Archivo CSV generado correctamente: " + fileName);
         } catch (IOException e) {
+            // PRÁCTICA 6: Gestión de excepción de escritura CSV
             System.err.println("Error al escribir el CSV: " + e.getMessage());
         }
     }
