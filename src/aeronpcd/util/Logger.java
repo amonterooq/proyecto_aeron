@@ -12,12 +12,17 @@ public class Logger {
 
     // Configura el log al inicio (crea carpeta y fichero con timestamp)
     public static void setup(String fullLogName) {
-        // Creamos carpeta logs si no existe
+        // Carpeta raíz
         String directoryPath = "logs";
-        new java.io.File(directoryPath).mkdirs();
-
-        // El driver ya nos pasa el nombre con formato correcto + timestamp
+        
+        // El driver nos pasa "carpeta/nombre_log", así que construimos la ruta completa
         String fileName = directoryPath + "/" + fullLogName + ".log";
+
+        // Aseguramos que existan todas las carpetas padres (logs/secuencial, logs/concurrente)
+        File file = new File(fileName);
+        if (file.getParentFile() != null) {
+            file.getParentFile().mkdirs();
+        }
 
         try {
             fileWriter = new PrintWriter(new FileWriter(fileName, true));

@@ -29,9 +29,8 @@ public class AirportDriver {
         System.out.println("Selecciona el Modo de Ejecución:");
         System.out.println("  1. SECUENCIAL");
         System.out.println("  2. CONCURRENTE");
-        System.out.print(">> Opción: ");
-
-        int opcionModo = scanner.nextInt();
+        
+        int opcionModo = readInt(scanner, ">> Opción: ", 1, 2);
 
         String modo;
         if (opcionModo == 1) {
@@ -40,22 +39,16 @@ public class AirportDriver {
             modo = "CONCURRENTE";
         }
 
-        System.out.print("\nNúmero de AVIONES (ej. 20): ");
-        int numAviones = scanner.nextInt();
-
-        System.out.print("Número de PISTAS (ej. 3): ");
-        int numPistas = scanner.nextInt();
-
-        System.out.print("Número de PUERTAS (ej. 5): ");
-        int numPuertas = scanner.nextInt();
+        int numAviones = readInt(scanner, "\nNúmero de AVIONES (ej. 1-100): ", 1, 100);
+        int numPistas = readInt(scanner, "Número de PISTAS (ej. 1-10): ", 1, 10);
+        int numPuertas = readInt(scanner, "Número de PUERTAS (ej. 1-20): ", 1, 20);
 
         int numOperarios = 1;
         // En secuencial no hay operarios concurrentes reales, pero el log pide el
         // número.
         // En concurrente, preguntamos cuántos hilos queremos.
         if (modo.equals("CONCURRENTE")) {
-            System.out.print("Número de OPERARIOS (ej. 5): ");
-            numOperarios = scanner.nextInt();
+            numOperarios = readInt(scanner, "Número de OPERARIOS (ej. 1-20): ", 1, 20);
         } else {
             // En secuencial simulamos que hay 1 para el nombre del log
             numOperarios = 1;
@@ -71,11 +64,11 @@ public class AirportDriver {
         // Formato: aeron-MODE-N1AV-N2PIS-N3PUE[-N4OPE-]-TIMESTAMP
         String logName;
         if (modo.equals("CONCURRENTE")) {
-            logName = String.format("aeron-%s-%d-%d-%d-%d-%s",
+            logName = String.format("concurrente/aeron-%s-%d-%d-%d-%d-%s",
                     modo, numAviones, numPistas, numPuertas, numOperarios, timeStamp);
         } else {
             // En secuencial no incluimos el número de operarios en el nombre
-            logName = String.format("aeron-%s-%d-%d-%d-%s",
+            logName = String.format("secuencial/aeron-%s-%d-%d-%d-%s",
                     modo, numAviones, numPistas, numPuertas, timeStamp);
         }
 
@@ -167,5 +160,41 @@ public class AirportDriver {
             // PRÁCTICA 6: Gestión de excepción de escritura CSV
             System.err.println("Error al escribir el CSV: " + e.getMessage());
         }
+    }
+
+    /**
+     * Lee un entero por consola asegurando que esté dentro de un rango determinado.
+     * Repite la solicitud hasta obtener un valor válido.
+     */
+    private static int readInt(Scanner scanner, String prompt, int min, int max) {
+        int value;
+        while (true) {
+            System.out.print(prompt);
+            if (scanner.hasNextInt()) {
+                value = scanner.nextInt();
+                if (value >= min && value <= max) {
+                    break;
+                } else {
+                    System.out.println("Error: El valor debe estar entre " + min + " y " + max + ".");
+                }
+            } else {
+                // Si se cierra el scanner (por ejemplo, Ctrl+C), hasNext() es false
+                if (!scanner.hasNext()) {
+                    System.out.println("\nEntrada finalizada. Cerrando programa...");
+                    System.exit(0);
+                }
+
+                // Capturamos la entrada que falló para analizarla
+                String input = scanner.next();
+                
+                // Si solo contiene dígitos, es un número válido pero demasiado grande (Overflow)
+                if (input.matches("-?\\d+")) {
+                     System.out.println("Error: El número es demasiado grande para ser procesado.");
+                } else {
+                     System.out.println("Error: Entrada no válida ('" + input + "'). Introduce un número entero.");
+                }
+            }
+        }
+        return value;
     }
 }

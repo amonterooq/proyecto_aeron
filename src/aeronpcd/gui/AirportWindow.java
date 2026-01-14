@@ -11,6 +11,8 @@ public class AirportWindow extends JFrame {
         super("Aeropuerto AERON - Monitor de Estado y Recursos");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(1200, 700);
+        // PRÁCTICA 7: Maximizar ventana para ver bien todos los recursos en simulaciones grandes
+        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.setLayout(new GridLayout(1, 2));
 
         // --- Panel Izquierdo: LOGS ---
@@ -48,7 +50,9 @@ public class AirportWindow extends JFrame {
         SwingUtilities.invokeLater(() -> {
             // Ya recibimos HTML puro, lo pintamos directamente
             stateArea.setText(htmlContent);
-            stateArea.setCaretPosition(0);
+            // PRÁCTICA 7: Eliminamos el reset de scroll (caretPosition) para permitir 
+            // que el usuario baje y vea la cola completa sin saltos.
+            // stateArea.setCaretPosition(0); 
         });
     }
 }
