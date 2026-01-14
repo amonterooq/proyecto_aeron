@@ -44,8 +44,10 @@ public class Airplane extends Thread {
     }
 
     /**
-     * Define el ciclo de vida completo del avión: Aterrizaje -> Embarque -> Despegue.
-     * Este método contiene la secuencia lógica, pero las esperas son gestionadas por monitores.
+     * Define el ciclo de vida completo del avión: Aterrizaje -> Embarque ->
+     * Despegue.
+     * Este método contiene la secuencia lógica, pero las esperas son gestionadas
+     * por monitores.
      */
     public void runSequential() {
         this.startTime = System.currentTimeMillis(); // Marca de tiempo de inicio
@@ -55,7 +57,8 @@ public class Airplane extends Thread {
         this.status = FlightStatus.LANDING_REQUEST;
         Logger.log("Avión [" + flightId + "] Solicita aterrizaje y ESPERA...");
 
-        // Enviamos petición a la torre y bloqueamos este hilo (wait()) hasta ser atendidos
+        // Enviamos petición a la torre y bloqueamos este hilo (wait()) hasta ser
+        // atendidos
         sendRequestAndWait(Request.Type.LANDING);
 
         // Si la torre nos ha asignado recursos (estado cambiado a LANDING_ASSIGNED)
@@ -103,7 +106,8 @@ public class Airplane extends Thread {
     /**
      * Envía una petición a la Torre de Control y bloquea el hilo del avión actual.
      * Patrón de sincronización: Wait-Notify.
-     * El avión espera pasivamente (wait) hasta que la Torre le asigne recursos y le despierte (notify).
+     * El avión espera pasivamente (wait) hasta que la Torre le asigne recursos y le
+     * despierte (notify).
      * 
      * @param type Tipo de petición (LANDING, TAKEOFF, etc.)
      */
@@ -112,7 +116,8 @@ public class Airplane extends Thread {
             // Añadimos la petición a la cola de la torre
             tower.addRequest(new Request(this, type));
             try {
-                // El avión se duerme aquí librando la CPU. Despertará cuando el Operario haga plane.notify()
+                // El avión se duerme aquí librando la CPU. Despertará cuando el Operario haga
+                // plane.notify()
                 this.wait();
             } catch (InterruptedException e) {
                 Logger.log("Avión [" + flightId + "] Interrumpido mientras esperaba.");

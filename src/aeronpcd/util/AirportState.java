@@ -5,12 +5,27 @@ import aeronpcd.model.Request;
 import aeronpcd.resources.Gate;
 import aeronpcd.resources.Runway;
 
+/**
+ * Clase de utilidad encargada de generar la representación visual del estado
+ * del aeropuerto.
+ * Utiliza HTML para renderizar paneles informativos enriquecidos en la interfaz
+ * Swing.
+ */
 public class AirportState {
 
-    // PRÁCTICA 4/7: Genera el código HTML para mostrar el estado en la ventana
+    /**
+     * Genera un documento HTML completo con el estado actual de todas las pistas,
+     * puertas y la cola de peticiones.
+     * 
+     * @param runways      Lista de pistas del aeropuerto.
+     * @param gates        Lista de puertas de embarque.
+     * @param requestQueue Cola de peticiones pendientes en la Torre.
+     * @return String con el código HTML listo para ser renderizado en un JTextPane.
+     */
     public static String getHTMLState(List<Runway> runways, List<Gate> gates, List<Request> requestQueue) {
         StringBuilder sb = new StringBuilder();
-        // Estilos CSS inline para compatibilidad con Swing
+        // Estilos CSS inline para compatibilidad con el motor de renderizado HTML3.2 de
+        // Swing
         sb.append("<html><body style='font-family:Monospaced; background-color:#0A0A28; color:#00FFFF; margin:10px;'>");
 
         // SECCIÓN PISTAS
@@ -24,6 +39,7 @@ public class AirportState {
         sb.append(generateResourceTable(gates, false));
 
         // SECCIÓN COLA
+        // Mostramos el tamaño actual de la cola para identificar saturación
         sb.append("<br><h2>Cola de Peticiones (" + requestQueue.size() + "):</h2>");
         sb.append("<hr color='#00FFFF'>");
         sb.append(generateQueueHTML(requestQueue));
@@ -32,12 +48,19 @@ public class AirportState {
         return sb.toString();
     }
 
-    // Genera tabla HTML para recursos (puntos verdes/rojos)
+    /**
+     * Helper que crea una tabla HTML para visualizar recursos como indicadores LED
+     * (Puntos).
+     * 
+     * @param resources Lista de objetos Runway o Gate.
+     * @param isRunway  Flag para hacer casting correcto.
+     * @return Tabla HTML.
+     */
     private static String generateResourceTable(List<?> resources, boolean isRunway) {
         StringBuilder table = new StringBuilder();
         table.append("<table width='100%'>");
 
-        // Cabeceras (IDs)
+        // Títulos de columnas (Ej: PIS1, PIS2...)
         table.append("<tr>");
         for (Object obj : resources) {
             String id = isRunway ? ((Runway) obj).getId() : ((Gate) obj).getId();
@@ -45,10 +68,11 @@ public class AirportState {
         }
         table.append("</tr>");
 
-        // Estado (Puntos)
+        // Indicadores de estado (Verde=Libre, Rojo=Ocupado)
         table.append("<tr>");
         for (Object obj : resources) {
             boolean available = isRunway ? ((Runway) obj).isAvailable() : !((Gate) obj).isOccupied();
+            // Inserción de carácter UNICODE '●' con color
             String dot = available ? "<font color='#00FF00' size='6'>●</font>"
                     : "<font color='#FF0000' size='6'>●</font>";
             table.append("<td align='center'>").append(dot).append("</td>");
@@ -57,7 +81,18 @@ public class AirportState {
         return table.toString();
     }
 
-    // Genera lista HTML para la cola
+    /**
+     * Helper que transforma la cola de peticiones en una lista HTML ordenada.
+     * Sincroniza sobre la cola para evitar ConcurrentModificationException mientras
+     * se lee.
+     * 
+     * @param queue Cola de peticiones.
+     * @return Lista HTML
+     *         <ul>
+     *         ...
+     *         </ul>
+     *         .
+     */
     private static String generateQueueHTML(List<Request> queue) {
         if (queue.isEmpty())
             return "<i>(Cola vacía)</i>";
@@ -65,10 +100,10 @@ public class AirportState {
         StringBuilder sb = new StringBuilder("<ul>");
         int i = 1;
 
-        // Sincronizamos para leer la lista sin errores concurrentes
+        // SECCIÓN CRÍTICA: La cola puede cambiar mientras se lee
         synchronized (queue) {
             for (Request r : queue) {
-                // IMPORTANTE: Usamos getFlightId()
+                // Obtenemos el ID del avión asociado a la petición
                 String planeId = (r.getPlane() != null) ? r.getPlane().getFlightId() : "??";
                 sb.append("<li><b>").append(i++).append(".</b> ")
                         .append(r.getType()).append(" &rarr; ").append(planeId).append("</li>");

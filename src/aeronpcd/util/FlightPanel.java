@@ -11,6 +11,7 @@ public class FlightPanel {
 
     /**
      * Configura el nombre del archivo JSON según el modo de ejecución.
+     * 
      * @param mode Modo de ejecución (SECUENCIAL o CONCURRENTE)
      */
     public static void setup(String mode) {
@@ -19,11 +20,13 @@ public class FlightPanel {
     }
 
     /**
-     * Actualiza el estado de un vuelo en memoria y persiste el cambio en el fichero JSON.
-     * Este método es Thread-Safe gracias al uso de mapas concurrentes y bloques sincronizados para la escritura.
+     * Actualiza el estado de un vuelo en memoria y persiste el cambio en el fichero
+     * JSON.
+     * Este método es Thread-Safe gracias al uso de mapas concurrentes y bloques
+     * sincronizados para la escritura.
      * 
      * @param flightId Identificador del vuelo (ej. IBE-001)
-     * @param status Nuevo estado (ej. LANDED, BOARDING)
+     * @param status   Nuevo estado (ej. LANDED, BOARDING)
      */
     public static void updateStatus(String flightId, String status) {
         flights.put(flightId, status); // Actualiza mapa en memoria
@@ -32,7 +35,8 @@ public class FlightPanel {
 
     /**
      * Guarda el estado actual de todos los vuelos en un fichero JSON.
-     * Synchronized para evitar que dos hilos escriban en el archivo simultáneamente y lo corrompan.
+     * Synchronized para evitar que dos hilos escriban en el archivo simultáneamente
+     * y lo corrompan.
      */
     private static synchronized void saveToJson() {
         StringBuilder json = new StringBuilder();

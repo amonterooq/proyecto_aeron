@@ -63,14 +63,15 @@ public class ControlTower {
             }
 
             // OPTIMIZACIÓN PRÁCTICA 7: Prioridad de mensajes
-            // Las peticiones que liberan recursos deben procesarse ANTES para evitar atascos (Starvation)
+            // Las peticiones que liberan recursos deben procesarse ANTES para evitar
+            // atascos (Starvation)
             // LANDED -> Libera Pista
             // BOARDED -> Libera Puerta
             // DEPARTED -> Libera Pista
-            if (request.getType() == Request.Type.LANDED || 
-                request.getType() == Request.Type.BOARDED || 
-                request.getType() == Request.Type.DEPARTED) {
-                
+            if (request.getType() == Request.Type.LANDED ||
+                    request.getType() == Request.Type.BOARDED ||
+                    request.getType() == Request.Type.DEPARTED) {
+
                 requestQueue.addFirst(request); // Prioridad Alta
                 // log("Torre (Debug)", "Priorizando " + request.getType());
             } else {
@@ -83,7 +84,8 @@ public class ControlTower {
             // Actualizamos la ventana gráfica
             updateVisualization();
 
-            // NotifyAll despierta a los operarios que estén esperando (wait) en la cola vacía
+            // NotifyAll despierta a los operarios que estén esperando (wait) en la cola
+            // vacía
             requestQueue.notifyAll();
         }
     }
@@ -165,16 +167,19 @@ public class ControlTower {
     // --- LÓGICA DE ASIGNACIÓN DE RECURSOS ---
     /**
      * Procesa la lógica de negocio de una petición.
-     * Gestiona la reserva y liberación de recursos compartidos (Pistas y Puertas) de forma atómica.
+     * Gestiona la reserva y liberación de recursos compartidos (Pistas y Puertas)
+     * de forma atómica.
      * 
      * @param req La petición a procesar
-     * @return true si la petición fue satisfecha exitosamente, false si faltan recursos
+     * @return true si la petición fue satisfecha exitosamente, false si faltan
+     *         recursos
      */
     private boolean processRequestLogic(Request req) {
         Airplane plane = req.getPlane();
         String planeId = plane.getFlightId(); // Usamos getFlightId corregido
 
-        // Sincronizamos la Torre (monitor objeto 'this') para garantizar exclusión mutua
+        // Sincronizamos la Torre (monitor objeto 'this') para garantizar exclusión
+        // mutua
         // al consultar y modificar el estado de pistas y puertas.
         // Evita condiciones de carrera donde dos aviones cojan la misma pista.
         synchronized (this) {

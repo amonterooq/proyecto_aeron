@@ -14,11 +14,12 @@ public class Logger {
     public static void setup(String fullLogName) {
         // Carpeta raíz
         String directoryPath = "logs";
-        
+
         // El driver nos pasa "carpeta/nombre_log", así que construimos la ruta completa
         String fileName = directoryPath + "/" + fullLogName + ".log";
 
-        // Aseguramos que existan todas las carpetas padres (logs/secuencial, logs/concurrente)
+        // Aseguramos que existan todas las carpetas padres (logs/secuencial,
+        // logs/concurrente)
         File file = new File(fileName);
         if (file.getParentFile() != null) {
             file.getParentFile().mkdirs();
@@ -34,7 +35,8 @@ public class Logger {
 
     /**
      * Escribe un mensaje en la salida estándar y en el archivo de log.
-     * Incluye una marca de tiempo y el nombre del hilo que genera el mensaje para facilitar el seguimiento (tracing).
+     * Incluye una marca de tiempo y el nombre del hilo que genera el mensaje para
+     * facilitar el seguimiento (tracing).
      * 
      * @param message El mensaje que se quiere registrar (sin marca de tiempo).
      */
@@ -51,7 +53,8 @@ public class Logger {
         // Escritura en fichero si está abierto
         if (fileWriter != null) {
             fileWriter.println(formattedMessage);
-            fileWriter.flush(); // Fuerza la escritura inmediata en disco para evitar pérdida si el programa falla
+            fileWriter.flush(); // Fuerza la escritura inmediata en disco para evitar pérdida si el programa
+                                // falla
         }
     }
 

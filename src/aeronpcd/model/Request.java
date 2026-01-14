@@ -2,9 +2,14 @@ package aeronpcd.model;
 
 // Clase que representa un mensaje/petición entre el Avión y la Torre
 public class Request {
-    // Tipos de mensajes posibles
+    // Definimos los tipos de petición que la torre sabe procesar
     public enum Type {
-        LANDING, LANDED, BOARDING, BOARDED, TAKEOFF, DEPARTED
+        LANDING, // Petición para aterrizar
+        LANDED, // Notificación de que ha terminado de aterrizar
+        BOARDING, // Notificación de inicio de embarque
+        BOARDED, // Notificación de fin de embarque
+        TAKEOFF, // Petición para despegar
+        DEPARTED // Notificación de que ha salido del sistema
     }
 
     private Airplane plane;

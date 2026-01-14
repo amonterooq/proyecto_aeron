@@ -29,7 +29,7 @@ public class AirportDriver {
         System.out.println("Selecciona el Modo de Ejecución:");
         System.out.println("  1. SECUENCIAL");
         System.out.println("  2. CONCURRENTE");
-        
+
         int opcionModo = readInt(scanner, ">> Opción: ", 1, 2);
 
         String modo;
@@ -60,7 +60,7 @@ public class AirportDriver {
 
         // 2. CONFIGURACIÓN DEL NOMBRE DEL LOG (Requisito estricto)
         String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        
+
         // Formato: aeron-MODE-N1AV-N2PIS-N3PUE[-N4OPE-]-TIMESTAMP
         String logName;
         if (modo.equals("CONCURRENTE")) {
@@ -74,7 +74,7 @@ public class AirportDriver {
 
         Logger.setup(logName);
         // Configuramos también el Panel de Vuelos para que use un JSON distinto
-         aeronpcd.util.FlightPanel.setup(modo);
+        aeronpcd.util.FlightPanel.setup(modo);
 
         Logger.log("=== INICIO SIMULACIÓN (" + modo + ") ===");
         Logger.log("Configuración: " + numAviones + " Aviones, " + numPistas + " Pistas, " +
@@ -114,7 +114,7 @@ public class AirportDriver {
             for (Airplane plane : airplanes) {
                 plane.start();
             }
-            
+
             // Esperar a que terminen (Join) con feedback visual
             System.out.println("Esperando finalización de vuelos...");
             int finalizados = 0;
@@ -142,9 +142,36 @@ public class AirportDriver {
         // 6. GENERAR CSV (Práctica 6: Resultados y archivo de salida)
         generateCSV(airplanes, modo);
 
+        // 7. MOSTRAR RESUMEN EN CONSOLA (Mejora de UX)
+        System.out.println("\n=== RANKING DE EFICIENCIA ===");
+        System.out.println(String.format("%-10s %-15s %s", "AVIÓN", "TIEMPO (ms)", "POS"));
+        System.out.println("------------------------------------");
+        // Mostramos solo los 5 primeros para no saturar
+        airplanes.stream()
+                .sorted(Comparator.comparingLong(Airplane::getTotalTime))
+                .limit(5)
+                .forEach(p -> System.out.println(
+                        String.format("%-10s %-15d %dº",
+                                p.getFlightId(), p.getTotalTime(), airplanes.indexOf(p) + 1) // Nota: indexOf no es
+                                                                                             // eficiente en stream pero
+                                                                                             // es solo mostrar 5
+                ));
+
+        // Recalculamos ranking real para mostrar
+        int rank = 1;
+        // Solo para mostrar el texto correctamente sin re-stream
+        for (Airplane p : airplanes) {
+            if (rank > 5)
+                break;
+            // Ya está ordenado por generateCSV
+            // Redundante pero simple para asegurar orden final en consola
+            // (generateCSV ordena la lista 'airplanes' in-place)
+            // Simplemente imprimimos la tabla limpia en el siguiente paso si preferimos.
+        }
+
         scanner.close();
 
-        System.out.println("Simulación finalizada con éxito. Cerrando aplicación...");
+        System.out.println("\nSimulación finalizada con éxito. Cerrando aplicación...");
         System.exit(0);
     }
 
@@ -152,20 +179,21 @@ public class AirportDriver {
      * Genera un archivo CSV con el resumen de la simulación.
      * Ordena los aviones por tiempo total de menor a mayor y genera un ranking.
      * 
-     * @param airplanes Lista de aviones que han completado (o intentado) la simulación.
-     * @param modo Modo de ejecución para generar el nombre del archivo.
+     * @param airplanes Lista de aviones que han completado (o intentado) la
+     *                  simulación.
+     * @param modo      Modo de ejecución para generar el nombre del archivo.
      */
     private static void generateCSV(List<Airplane> airplanes, String modo) {
         // Se guarda dentro de la carpeta logs/secuencial o logs/concurrente
         String fileName = "logs/" + modo.toLowerCase() + "/aeropuerto_resumen.csv";
-        
+
         // Ordenamos la lista de aviones por su tiempo total de operación (ascendente)
         airplanes.sort(Comparator.comparingLong(Airplane::getTotalTime));
 
         try (FileWriter writer = new FileWriter(fileName)) {
             // Cabecera del CSV
             writer.write("Avión;Tiempo total (ms);Observaciones\n");
-            
+
             int rank = 1;
             for (Airplane plane : airplanes) {
                 // Escribe una fila por avión: ID, Tiempo Total, Posición en el ranking
@@ -204,12 +232,13 @@ public class AirportDriver {
 
                 // Capturamos la entrada que falló para analizarla
                 String input = scanner.next();
-                
-                // Si solo contiene dígitos, es un número válido pero demasiado grande (Overflow)
+
+                // Si solo contiene dígitos, es un número válido pero demasiado grande
+                // (Overflow)
                 if (input.matches("-?\\d+")) {
-                     System.out.println("Error: El número es demasiado grande para ser procesado.");
+                    System.out.println("Error: El número es demasiado grande para ser procesado.");
                 } else {
-                     System.out.println("Error: Entrada no válida ('" + input + "'). Introduce un número entero.");
+                    System.out.println("Error: Entrada no válida ('" + input + "'). Introduce un número entero.");
                 }
             }
         }
