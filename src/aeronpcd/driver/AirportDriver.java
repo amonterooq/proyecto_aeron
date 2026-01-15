@@ -17,7 +17,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * Clase principal (Driver) del simulador de aeropuerto AERON.
@@ -230,8 +229,6 @@ public class AirportDriver {
             System.out.println(String.format("%-10s %-15d %dº",
                     p.getFlightId(), p.getTotalTime(), i + 1));
         }
-
-        // scanner.close(); // Eliminado porque ya no usamos Scanner
 
         System.out.println("\nSimulación finalizada con éxito. Cerrando aplicación...");
         JOptionPane.showMessageDialog(null, "Simulación finalizada.\nConsulta el log y el CSV para más detalles.", "AERON - Fin", JOptionPane.INFORMATION_MESSAGE);
