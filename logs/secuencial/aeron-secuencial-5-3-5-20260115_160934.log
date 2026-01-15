@@ -1,0 +1,48 @@
+[16:09:34.318] [main      ] === INICIO SIMULACIÓN (SECUENCIAL) ===
+[16:09:34.325] [main      ] Configuración: 5 Aviones, 3 Pistas, 5 Puertas, 1 Operarios.
+[16:09:34.495] [main      ] Avión [IBE-001 - IN_FLIGHT] Inicia ciclo
+[16:09:34.495] [main      ] Avión [IBE-001] Solicita aterrizaje y ESPERA...
+[16:09:34.500] [main      ] [Torre de control] Recibida solicitud LANDING de Avión [IBE-001]
+[16:09:34.504] [OP-5      ] [Torre de control] Operario [OP-5] atendiendo LANDING de vuelo IBE-001
+[16:09:35.019] [OP-5      ] [Torre de control] Asignados: Pista PIS1 y Puerta PUE1 a IBE-001
+[16:09:35.019] [OP-5      ] [Torre de control] Operario [OP-5] VALIDÓ LANDING para IBE-001
+[16:09:35.019] [main      ] Avión [IBE-001] Recibe luz verde. Asignado a PIS1
+[16:09:35.019] [main      ] Avión [IBE-001 - LANDING] Aterrizando (100ms)...
+[16:09:35.131] [main      ] [Torre de control] Recibida solicitud LANDED de Avión [IBE-001]
+[16:09:35.131] [OP-1      ] [Torre de control] Operario [OP-1] atendiendo LANDED de vuelo IBE-001
+[16:09:35.646] [OP-1      ] [Torre de control] Operario [OP-1] VALIDÓ LANDED para IBE-001
+[16:09:35.646] [main      ] Avión [IBE-001 - BOARDING] Embarcando (50ms)...
+[16:09:35.709] [main      ] [Torre de control] Recibida solicitud BOARDING de Avión [IBE-001]
+[16:09:35.710] [OP-5      ] [Torre de control] Operario [OP-5] atendiendo BOARDING de vuelo IBE-001
+[16:09:36.215] [OP-5      ] [Torre de control] Operario [OP-5] VALIDÓ BOARDING para IBE-001
+[16:09:36.215] [main      ] [Torre de control] Recibida solicitud BOARDED de Avión [IBE-001]
+[16:09:36.215] [OP-1      ] [Torre de control] Operario [OP-1] atendiendo BOARDED de vuelo IBE-001
+[16:09:36.726] [OP-1      ] [Torre de control] Operario [OP-1] VALIDÓ BOARDED para IBE-001
+[16:09:36.726] [main      ] Avión [IBE-001] Solicita despegue y ESPERA...
+[16:09:36.726] [main      ] [Torre de control] Recibida solicitud TAKEOFF de Avión [IBE-001]
+[16:09:36.726] [OP-5      ] [Torre de control] Operario [OP-5] atendiendo TAKEOFF de vuelo IBE-001
+[16:09:37.230] [OP-5      ] [Torre de control] Asignada Pista PIS1 para despegue de IBE-001
+[16:09:37.230] [OP-5      ] [Torre de control] Operario [OP-5] VALIDÓ TAKEOFF para IBE-001
+[16:09:37.230] [main      ] Avión [IBE-001] Recibe luz verde. Despegue en PIS1
+[16:09:37.230] [main      ] Avión [IBE-001 - DEPARTING] Despegando (100ms)...
+[16:09:37.341] [main      ] [Torre de control] Recibida solicitud DEPARTED de Avión [IBE-001]
+[16:09:37.341] [OP-1      ] [Torre de control] Operario [OP-1] atendiendo DEPARTED de vuelo IBE-001
+[16:09:37.848] [OP-1      ] [Torre de control] Operario [OP-1] VALIDÓ DEPARTED para IBE-001
+[16:09:37.851] [main      ] Avión [IBE-001 - DEPARTED] Ciclo completado en 3353 ms
+[16:09:37.851] [main      ] Avión [IBE-002 - IN_FLIGHT] Inicia ciclo
+[16:09:37.851] [main      ] Avión [IBE-002] Solicita aterrizaje y ESPERA...
+[16:09:37.851] [main      ] [Torre de control] Recibida solicitud LANDING de Avión [IBE-002]
+[16:09:37.851] [OP-5      ] [Torre de control] Operario [OP-5] atendiendo LANDING de vuelo IBE-002
+[16:09:38.361] [OP-5      ] [Torre de control] Asignados: Pista PIS1 y Puerta PUE1 a IBE-002
+[16:09:38.361] [OP-5      ] [Torre de control] Operario [OP-5] VALIDÓ LANDING para IBE-002
+[16:09:38.361] [main      ] Avión [IBE-002] Recibe luz verde. Asignado a PIS1
+[16:09:38.361] [main      ] Avión [IBE-002 - LANDING] Aterrizando (100ms)...
+[16:09:38.474] [main      ] [Torre de control] Recibida solicitud LANDED de Avión [IBE-002]
+[16:09:38.475] [OP-1      ] [Torre de control] Operario [OP-1] atendiendo LANDED de vuelo IBE-002
+[16:09:38.982] [OP-1      ] [Torre de control] Operario [OP-1] VALIDÓ LANDED para IBE-002
+[16:09:38.982] [main      ] Avión [IBE-002 - BOARDING] Embarcando (50ms)...
+[16:09:39.044] [main      ] [Torre de control] Recibida solicitud BOARDING de Avión [IBE-002]
+[16:09:39.045] [OP-5      ] [Torre de control] Operario [OP-5] atendiendo BOARDING de vuelo IBE-002
+[16:09:39.546] [OP-5      ] [Torre de control] Operario [OP-5] VALIDÓ BOARDING para IBE-002
+[16:09:39.546] [main      ] [Torre de control] Recibida solicitud BOARDED de Avión [IBE-002]
+[16:09:39.546] [OP-1      ] [Torre de control] Operario [OP-1] atendiendo BOARDED de vuelo IBE-002

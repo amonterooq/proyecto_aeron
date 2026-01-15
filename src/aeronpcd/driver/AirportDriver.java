@@ -8,6 +8,8 @@ import aeronpcd.tower.ControlTower;
 import aeronpcd.util.FlightPanel;
 import aeronpcd.util.Logger;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -29,39 +31,103 @@ import java.util.Scanner;
 public class AirportDriver {
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        // 1. CONFIGURACIÓN MEDIANTE VENTANA (GUI)
+        // Intentamos usar el estilo visual del sistema operativo
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ignored) {}
 
-        // 1. MENÚ DE CONFIGURACIÓN INICIAL
-        System.out.println("============================================");
-        System.out.println("   AERON - CONFIGURACIÓN DE SIMULACIÓN      ");
-        System.out.println("============================================");
+        // MEJORA DE ACCESIBILIDAD: Fuentes más grandes y legibles (16px)
+        Font mainFont = new Font("Segoe UI", Font.PLAIN, 18);
+        Font boldFont = new Font("Segoe UI", Font.BOLD, 18);
+        
+        // Configurar fuentes globales para componentes internos de JOptionPane
+        UIManager.put("OptionPane.messageFont", mainFont);
+        UIManager.put("OptionPane.buttonFont", mainFont);
+        UIManager.put("Label.font", mainFont);
 
-        System.out.println("Selecciona el Modo de Ejecución:");
-        System.out.println("  1. SECUENCIAL");
-        System.out.println("  2. CONCURRENTE");
+        // Componentes del formulario
+        JComboBox<String> comboModo = new JComboBox<>(new String[]{"-- Seleccione Modo --", "SECUENCIAL", "CONCURRENTE"});
+        comboModo.setFont(mainFont);
+        
+        // Modelos de datos
+        JSpinner spinAviones = new JSpinner(new SpinnerNumberModel(5, 1, 100, 1));
+        JSpinner spinPistas = new JSpinner(new SpinnerNumberModel(3, 1, 10, 1));
+        JSpinner spinPuertas = new JSpinner(new SpinnerNumberModel(5, 1, 20, 1));
+        JSpinner spinOperarios = new JSpinner(new SpinnerNumberModel(5, 1, 20, 1));
 
-        int opcionModo = readInt(scanner, ">> Opción: ", 1, 2);
+        // Aplicamos la fuente y configuración de validación a los spinners
+        configureSpinner(spinAviones, mainFont);
+        configureSpinner(spinPistas, mainFont);
+        configureSpinner(spinPuertas, mainFont);
+        configureSpinner(spinOperarios, mainFont);
 
-        String modo;
-        if (opcionModo == 1) {
-            modo = "SECUENCIAL";
-        } else {
-            modo = "CONCURRENTE";
+        // Lógica dinámica
+        spinOperarios.setEnabled(false); 
+        comboModo.addActionListener(e -> {
+            String selected = (String) comboModo.getSelectedItem();
+            boolean isConcurrent = "CONCURRENTE".equals(selected);
+            spinOperarios.setEnabled(isConcurrent);
+        });
+
+        // Panel con diseño espacioso (Accesibilidad: Layout limpio)
+        JPanel panel = new JPanel(new GridLayout(0, 2, 20, 20)); // Más espacio entre elementos
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Helper local para etiquetas legibles
+        JLabel lblModo = new JLabel("Modo de Ejecución:"); lblModo.setFont(boldFont);
+        panel.add(lblModo);
+        panel.add(comboModo);
+        
+        panel.add(new JLabel("Número de Aviones (1-100):")); panel.add(spinAviones);
+        panel.add(new JLabel("Número de Pistas (1-10):"));  panel.add(spinPistas);
+        panel.add(new JLabel("Número de Puertas (1-20):")); panel.add(spinPuertas);
+        panel.add(new JLabel("Nº Operarios (Solo Concurrente):")); panel.add(spinOperarios);
+
+        // Bucle de validación
+        while (true) {
+            int result = JOptionPane.showConfirmDialog(null, panel, "Configuración AERON", 
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+            if (result != JOptionPane.OK_OPTION) {
+                System.out.println("Configuración cancelada por el usuario.");
+                System.exit(0);
+            }
+
+            // Validación explícita: El usuario DEBE seleccionar un modo
+            if (comboModo.getSelectedIndex() == 0) {
+                JOptionPane.showMessageDialog(null, 
+                    "Por favor, seleccione un modo de ejecución válido (Secuencial o Concurrente).", 
+                    "Aviso", JOptionPane.WARNING_MESSAGE);
+                continue; // Re-mostrar diálogo
+            }
+            
+            // Validar spinners para detectar basura e impedir corrección automática sin aviso
+            try {
+                validateSpinner(spinAviones, "Aviones", 1, 100);
+                validateSpinner(spinPistas, "Pistas", 1, 10);
+                validateSpinner(spinPuertas, "Puertas", 1, 20);
+                if (spinOperarios.isEnabled()) {
+                    validateSpinner(spinOperarios, "Operarios", 1, 20);
+                }
+            } catch (Exception e) {
+                 JOptionPane.showMessageDialog(null, e.getMessage(), "Error en entrada", JOptionPane.ERROR_MESSAGE);
+                 continue; // Re-mostrar diálogo sin cerrar
+            }
+            
+            // Si todo es correcto, salimos del bucle
+            break;
         }
 
-        int numAviones = readInt(scanner, "\nNúmero de AVIONES (ej. 1-100): ", 1, 100);
-        int numPistas = readInt(scanner, "Número de PISTAS (ej. 1-10): ", 1, 10);
-        int numPuertas = readInt(scanner, "Número de PUERTAS (ej. 1-20): ", 1, 20);
-
+        // Lectura de valores seleccionados
+        String modo = (String) comboModo.getSelectedItem();
+        int numAviones = (Integer) spinAviones.getValue();
+        int numPistas = (Integer) spinPistas.getValue();
+        int numPuertas = (Integer) spinPuertas.getValue();
         int numOperarios = 1;
-        // En secuencial no hay operarios concurrentes reales, pero el log pide el
-        // número.
-        // En concurrente, preguntamos cuántos hilos queremos.
-        if (modo.equals("CONCURRENTE")) {
-            numOperarios = readInt(scanner, "Número de OPERARIOS (ej. 1-20): ", 1, 20);
-        } else {
-            // En secuencial simulamos que hay 1 para el nombre del log
-            numOperarios = 1;
+        
+        if ("CONCURRENTE".equals(modo)) {
+            numOperarios = (Integer) spinOperarios.getValue();
         }
 
         System.out.println("\n--------------------------------------------");
@@ -71,15 +137,15 @@ public class AirportDriver {
         // 2. CONFIGURACIÓN DEL NOMBRE DEL LOG (Requisito estricto)
         String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
 
-        // Formato: aeron-MODE-N1AV-N2PIS-N3PUE[-N4OPE-]-TIMESTAMP
+        // Formato: aeron-mode-N1AV-N2PIS-N3PUE[-N4OPE-]-TIMESTAMP
         String logName;
         if (modo.equals("CONCURRENTE")) {
             logName = String.format("concurrente/aeron-%s-%d-%d-%d-%d-%s",
-                    modo, numAviones, numPistas, numPuertas, numOperarios, timeStamp);
+                    modo.toLowerCase(), numAviones, numPistas, numPuertas, numOperarios, timeStamp);
         } else {
             // En secuencial no incluimos el número de operarios en el nombre
             logName = String.format("secuencial/aeron-%s-%d-%d-%d-%s",
-                    modo, numAviones, numPistas, numPuertas, timeStamp);
+                    modo.toLowerCase(), numAviones, numPistas, numPuertas, timeStamp);
         }
 
         Logger.setup(logName);
@@ -165,9 +231,10 @@ public class AirportDriver {
                     p.getFlightId(), p.getTotalTime(), i + 1));
         }
 
-        scanner.close();
+        // scanner.close(); // Eliminado porque ya no usamos Scanner
 
         System.out.println("\nSimulación finalizada con éxito. Cerrando aplicación...");
+        JOptionPane.showMessageDialog(null, "Simulación finalizada.\nConsulta el log y el CSV para más detalles.", "AERON - Fin", JOptionPane.INFORMATION_MESSAGE);
         System.exit(0);
     }
 
@@ -204,40 +271,36 @@ public class AirportDriver {
         }
     }
 
-    /**
-     * Lee un entero por consola asegurando que esté dentro de un rango determinado.
-     * Repite la solicitud hasta obtener un valor válido.
-     */
-    private static int readInt(Scanner scanner, String prompt, int min, int max) {
-        int value;
-        while (true) {
-            System.out.print(prompt);
-            if (scanner.hasNextInt()) {
-                value = scanner.nextInt();
-                if (value >= min && value <= max) {
-                    break;
-                } else {
-                    System.out.println("Error: El valor debe estar entre " + min + " y " + max + ".");
-                }
-            } else {
-                // Si se cierra el scanner (por ejemplo, Ctrl+C), hasNext() es false
-                if (!scanner.hasNext()) {
-                    System.out.println("\nEntrada finalizada. Cerrando programa...");
-                    System.exit(0);
-                }
+    // --- MÉTODOS DE VALIDACIÓN GUI ---
 
-                // Capturamos la entrada que falló para analizarla
-                String input = scanner.next();
+    private static void configureSpinner(JSpinner spinner, Font font) {
+        spinner.setFont(font);
+        JComponent editor = spinner.getEditor();
+        if (editor instanceof JSpinner.DefaultEditor) {
+            JFormattedTextField tf = ((JSpinner.DefaultEditor) editor).getTextField();
+            tf.setFont(font); // Aplicamos fuente grande también al campo de texto
+            
+            // IMPORTANTE: Evita que el spinner revierta automáticamente valores inválidos al perder foco.
+            // Esto permite que podamos "leer" el valor no válido y notificar al usuario.
+            tf.setFocusLostBehavior(JFormattedTextField.PERSIST);
+        }
+    }
 
-                // Si solo contiene dígitos, es un número válido pero demasiado grande
-                // (Overflow)
-                if (input.matches("-?\\d+")) {
-                    System.out.println("Error: El número es demasiado grande para ser procesado.");
-                } else {
-                    System.out.println("Error: Entrada no válida ('" + input + "'). Introduce un número entero.");
+    private static void validateSpinner(JSpinner spinner, String name, int min, int max) throws Exception {
+        JComponent editor = spinner.getEditor();
+        if (editor instanceof JSpinner.DefaultEditor) {
+            JFormattedTextField tf = ((JSpinner.DefaultEditor) editor).getTextField();
+            String text = tf.getText();
+            try {
+                int value = Integer.parseInt(text.trim());
+                if (value < min || value > max) {
+                     throw new Exception("El campo '" + name + "' debe estar entre " + min + " y " + max + ".");
                 }
+                // Si es válido, actualizamos el modelo explícitamente por si estaba en modo PERSIST sin commit
+                spinner.setValue(value);
+            } catch (NumberFormatException e) {
+                throw new Exception("El campo '" + name + "' contiene un valor inválido ('" + text + "').\nPor favor, introduce solo números enteros.");
             }
         }
-        return value;
     }
 }
