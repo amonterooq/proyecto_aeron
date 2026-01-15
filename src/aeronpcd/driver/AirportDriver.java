@@ -29,58 +29,104 @@ import java.util.List;
  */
 public class AirportDriver {
 
+    // Constantes de configuración por defecto y límites
+    private static final int MIN_PLANES = 1, MAX_PLANES = 100;
+    private static final int MIN_RUNWAYS = 1, MAX_RUNWAYS = 10;
+    private static final int MIN_GATES = 1, MAX_GATES = 20;
+    private static final int MIN_OPERATORS = 1, MAX_OPERATORS = 20;
+
+    private static class SimulationConfig {
+        String mode;
+        int planes;
+        int runways;
+        int gates;
+        int operators;
+    }
+
     public static void main(String[] args) {
-        // 1. CONFIGURACIÓN MEDIANTE VENTANA (GUI)
-        // Intentamos usar el estilo visual del sistema operativo
+        // 1. Configuración visual y obtención de parámetros
+        setupLookAndFeel();
+        SimulationConfig config = showConfigurationDialog();
+
+        if (config == null) {
+            System.out.println("Configuración cancelada por el usuario.");
+            System.exit(0);
+        }
+
+        System.out.println("\n--------------------------------------------");
+        System.out.println("Iniciando simulación " + config.mode + "...");
+        System.out.println("--------------------------------------------");
+
+        // 2. Configuración del Logging
+        initializeLogging(config);
+
+        // 3. Inicialización del entorno (Ventana, Torre, Recursos)
+        AirportWindow window = new AirportWindow();
+        ControlTower tower = initializeEnvironment(config, window);
+
+        // 4. Creación de Aviones
+        List<Airplane> airplanes = createAirplanes(config.planes, tower);
+
+        // 5. Ejecución
+        runSimulation(config, airplanes);
+
+        // 6. Cierre y Reporting
+        finalizeSimulation(config, airplanes);
+    }
+
+    // --- MÉTODOS DE SOPORTE ESTRUCTURAL ---
+
+    private static void setupLookAndFeel() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            // Accesibilidad: Fuentes globales más grandes (18px)
+            Font mainFont = new Font("Segoe UI", Font.PLAIN, 18);
+            UIManager.put("OptionPane.messageFont", mainFont);
+            UIManager.put("OptionPane.buttonFont", mainFont);
+            UIManager.put("Label.font", mainFont);
+            UIManager.put("ComboBox.font", mainFont);
+            UIManager.put("TextField.font", mainFont);
         } catch (Exception ignored) {}
+    }
 
-        // MEJORA DE ACCESIBILIDAD: Fuentes más grandes y legibles (16px)
+    private static SimulationConfig showConfigurationDialog() {
         Font mainFont = new Font("Segoe UI", Font.PLAIN, 18);
         Font boldFont = new Font("Segoe UI", Font.BOLD, 18);
-        
-        // Configurar fuentes globales para componentes internos de JOptionPane
-        UIManager.put("OptionPane.messageFont", mainFont);
-        UIManager.put("OptionPane.buttonFont", mainFont);
-        UIManager.put("Label.font", mainFont);
 
         // Componentes del formulario
         JComboBox<String> comboModo = new JComboBox<>(new String[]{"-- Seleccione Modo --", "SECUENCIAL", "CONCURRENTE"});
         comboModo.setFont(mainFont);
         
         // Modelos de datos
-        JSpinner spinAviones = new JSpinner(new SpinnerNumberModel(5, 1, 100, 1));
-        JSpinner spinPistas = new JSpinner(new SpinnerNumberModel(3, 1, 10, 1));
-        JSpinner spinPuertas = new JSpinner(new SpinnerNumberModel(5, 1, 20, 1));
-        JSpinner spinOperarios = new JSpinner(new SpinnerNumberModel(5, 1, 20, 1));
+        JSpinner spinAviones = new JSpinner(new SpinnerNumberModel(5, MIN_PLANES, MAX_PLANES, 1));
+        JSpinner spinPistas = new JSpinner(new SpinnerNumberModel(3, MIN_RUNWAYS, MAX_RUNWAYS, 1));
+        JSpinner spinPuertas = new JSpinner(new SpinnerNumberModel(5, MIN_GATES, MAX_GATES, 1));
+        JSpinner spinOperarios = new JSpinner(new SpinnerNumberModel(5, MIN_OPERATORS, MAX_OPERATORS, 1));
 
-        // Aplicamos la fuente y configuración de validación a los spinners
         configureSpinner(spinAviones, mainFont);
         configureSpinner(spinPistas, mainFont);
         configureSpinner(spinPuertas, mainFont);
         configureSpinner(spinOperarios, mainFont);
 
-        // Lógica dinámica
+        // Lógica visual dinámica
         spinOperarios.setEnabled(false); 
         comboModo.addActionListener(e -> {
-            String selected = (String) comboModo.getSelectedItem();
-            boolean isConcurrent = "CONCURRENTE".equals(selected);
+            boolean isConcurrent = "CONCURRENTE".equals(comboModo.getSelectedItem());
             spinOperarios.setEnabled(isConcurrent);
         });
 
-        // Panel con diseño espacioso (Accesibilidad: Layout limpio)
-        JPanel panel = new JPanel(new GridLayout(0, 2, 20, 20)); // Más espacio entre elementos
+        // Panel de diseño
+        JPanel panel = new JPanel(new GridLayout(0, 2, 20, 20)); // Layout espacioso
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Helper local para etiquetas legibles
-        JLabel lblModo = new JLabel("Modo de Ejecución:"); lblModo.setFont(boldFont);
+        JLabel lblModo = new JLabel("Modo de Ejecución:"); 
+        lblModo.setFont(boldFont);
         panel.add(lblModo);
         panel.add(comboModo);
         
-        panel.add(new JLabel("Número de Aviones (1-100):")); panel.add(spinAviones);
-        panel.add(new JLabel("Número de Pistas (1-10):"));  panel.add(spinPistas);
-        panel.add(new JLabel("Número de Puertas (1-20):")); panel.add(spinPuertas);
+        panel.add(new JLabel("Número de Aviones (" + MIN_PLANES + "-" + MAX_PLANES + "):")); panel.add(spinAviones);
+        panel.add(new JLabel("Número de Pistas (" + MIN_RUNWAYS + "-" + MAX_RUNWAYS + "):"));  panel.add(spinPistas);
+        panel.add(new JLabel("Número de Puertas (" + MIN_GATES + "-" + MAX_GATES + "):")); panel.add(spinPuertas);
         panel.add(new JLabel("Nº Operarios (Solo Concurrente):")); panel.add(spinOperarios);
 
         // Bucle de validación
@@ -88,151 +134,134 @@ public class AirportDriver {
             int result = JOptionPane.showConfirmDialog(null, panel, "Configuración AERON", 
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
-            if (result != JOptionPane.OK_OPTION) {
-                System.out.println("Configuración cancelada por el usuario.");
-                System.exit(0);
-            }
+            if (result != JOptionPane.OK_OPTION) return null;
 
-            // Validación explícita: El usuario DEBE seleccionar un modo
             if (comboModo.getSelectedIndex() == 0) {
-                JOptionPane.showMessageDialog(null, 
-                    "Por favor, seleccione un modo de ejecución válido (Secuencial o Concurrente).", 
-                    "Aviso", JOptionPane.WARNING_MESSAGE);
-                continue; // Re-mostrar diálogo
+                showError("Por favor, seleccione un modo de ejecución válido.");
+                continue;
             }
             
-            // Validar spinners para detectar basura e impedir corrección automática sin aviso
             try {
-                validateSpinner(spinAviones, "Aviones", 1, 100);
-                validateSpinner(spinPistas, "Pistas", 1, 10);
-                validateSpinner(spinPuertas, "Puertas", 1, 20);
+                validateSpinner(spinAviones, "Aviones", MIN_PLANES, MAX_PLANES);
+                validateSpinner(spinPistas, "Pistas", MIN_RUNWAYS, MAX_RUNWAYS);
+                validateSpinner(spinPuertas, "Puertas", MIN_GATES, MAX_GATES);
                 if (spinOperarios.isEnabled()) {
-                    validateSpinner(spinOperarios, "Operarios", 1, 20);
+                    validateSpinner(spinOperarios, "Operarios", MIN_OPERATORS, MAX_OPERATORS);
                 }
             } catch (Exception e) {
-                 JOptionPane.showMessageDialog(null, e.getMessage(), "Error en entrada", JOptionPane.ERROR_MESSAGE);
-                 continue; // Re-mostrar diálogo sin cerrar
+                 showError(e.getMessage());
+                 continue;
             }
             
-            // Si todo es correcto, salimos del bucle
-            break;
+            // Construir resultado
+            SimulationConfig config = new SimulationConfig();
+            config.mode = (String) comboModo.getSelectedItem();
+            config.planes = (Integer) spinAviones.getValue();
+            config.runways = (Integer) spinPistas.getValue();
+            config.gates = (Integer) spinPuertas.getValue();
+            config.operators = "CONCURRENTE".equals(config.mode) ? (Integer) spinOperarios.getValue() : 1;
+            
+            return config;
         }
+    }
 
-        // Lectura de valores seleccionados
-        String modo = (String) comboModo.getSelectedItem();
-        int numAviones = (Integer) spinAviones.getValue();
-        int numPistas = (Integer) spinPistas.getValue();
-        int numPuertas = (Integer) spinPuertas.getValue();
-        int numOperarios = 1;
-        
-        if ("CONCURRENTE".equals(modo)) {
-            numOperarios = (Integer) spinOperarios.getValue();
-        }
-
-        System.out.println("\n--------------------------------------------");
-        System.out.println("Iniciando simulación " + modo + "...");
-        System.out.println("--------------------------------------------");
-
-        // 2. CONFIGURACIÓN DEL NOMBRE DEL LOG (Requisito estricto)
+    private static void initializeLogging(SimulationConfig config) {
         String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-
-        // Formato: aeron-mode-N1AV-N2PIS-N3PUE[-N4OPE-]-TIMESTAMP
         String logName;
-        if (modo.equals("CONCURRENTE")) {
+        
+        if ("CONCURRENTE".equals(config.mode)) {
             logName = String.format("concurrente/aeron-%s-%d-%d-%d-%d-%s",
-                    modo.toLowerCase(), numAviones, numPistas, numPuertas, numOperarios, timeStamp);
+                    config.mode.toLowerCase(), config.planes, config.runways, config.gates, config.operators, timeStamp);
         } else {
-            // En secuencial no incluimos el número de operarios en el nombre
             logName = String.format("secuencial/aeron-%s-%d-%d-%d-%s",
-                    modo.toLowerCase(), numAviones, numPistas, numPuertas, timeStamp);
+                    config.mode.toLowerCase(), config.planes, config.runways, config.gates, timeStamp);
         }
 
         Logger.setup(logName);
-        // Configuramos también el Panel de Vuelos para que use un JSON distinto
-        FlightPanel.setup(modo);
+        FlightPanel.setup(config.mode);
 
-        Logger.log("=== INICIO SIMULACIÓN (" + modo + ") ===");
-        Logger.log("Configuración: " + numAviones + " Aviones, " + numPistas + " Pistas, " +
-                numPuertas + " Puertas, " + numOperarios + " Operarios.");
+        Logger.log("=== INICIO SIMULACIÓN (" + config.mode + ") ===");
+        Logger.log(String.format("Configuración: %d Aviones, %d Pistas, %d Puertas, %d Operarios.", 
+                   config.planes, config.runways, config.gates, config.operators));
+    }
 
-        // 3. INICIALIZAR ENTORNO
-        AirportWindow window = new AirportWindow();
-
+    private static ControlTower initializeEnvironment(SimulationConfig config, AirportWindow window) {
         List<Runway> runways = new ArrayList<>();
-        for (int i = 1; i <= numPistas; i++)
-            runways.add(new Runway("PIS" + i));
+        for (int i = 1; i <= config.runways; i++) runways.add(new Runway("PIS" + i));
 
         List<Gate> gates = new ArrayList<>();
-        for (int i = 1; i <= numPuertas; i++)
-            gates.add(new Gate("PUE" + i));
+        for (int i = 1; i <= config.gates; i++) gates.add(new Gate("PUE" + i));
 
         ControlTower tower = new ControlTower(runways, gates);
         tower.setWindow(window);
+        return tower;
+    }
 
-        // 4. CREAR AVIONES
+    private static List<Airplane> createAirplanes(int count, ControlTower tower) {
         List<Airplane> airplanes = new ArrayList<>();
-        for (int i = 1; i <= numAviones; i++) {
+        for (int i = 1; i <= count; i++) {
             airplanes.add(new Airplane(String.format("IBE-%03d", i), tower));
         }
+        return airplanes;
+    }
 
-        long simulationStart = System.currentTimeMillis();
+    private static void runSimulation(SimulationConfig config, List<Airplane> airplanes) {
+        long start = System.currentTimeMillis();
 
-        // 5. EJECUCIÓN SEGÚN MODO
-        if (modo.equals("SECUENCIAL")) {
-            // Modo Secuencial: Uno detrás de otro
+        if ("SECUENCIAL".equals(config.mode)) {
             for (Airplane plane : airplanes) {
                 plane.runSequential();
             }
         } else {
-            // Modo Concurrente: Todos a la vez.
-            // Los aviones son hilos (extends Thread)
-            System.out.println("Lanzando " + numAviones + " aviones en paralelo...");
-            for (Airplane plane : airplanes) {
-                plane.start();
-            }
+            System.out.println("Lanzando " + config.planes + " aviones en paralelo...");
+            for (Airplane plane : airplanes) plane.start();
 
-            // JOIN: Esperar a que terminen con feedback visual de progreso
             System.out.println("Esperando finalización de vuelos...");
-            int finalizados = 0;
+            int done = 0;
             for (Airplane plane : airplanes) {
                 try {
                     plane.join();
-                    finalizados++;
-                    if (finalizados % 5 == 0 || finalizados == numAviones) {
-                        System.out.println("Progreso: " + finalizados + "/" + numAviones + " aviones finalizados.");
+                    done++;
+                    if (done % 5 == 0 || done == config.planes) {
+                        System.out.println("Progreso: " + done + "/" + config.planes + " activados.");
                     }
                 } catch (InterruptedException e) {
-                    Logger.log("Driver interrumpido mientras esperaba al avión " + plane.getName());
+                    Logger.log("Driver interrumpido: " + e.getMessage());
                 }
             }
-            System.out.println("Todos los aviones han aterrizado y despegado.");
+            System.out.println("Todos los aviones han finalizado.");
         }
 
-        long simulationEnd = System.currentTimeMillis();
-        long totalDuration = simulationEnd - simulationStart; // Duración total experimental
-
+        long duration = System.currentTimeMillis() - start;
         Logger.log("=== FIN DE LA SIMULACIÓN ===");
-        Logger.log("TIEMPO TOTAL: " + totalDuration + " ms");
-        Logger.close(); // Cerramos el fichero de log de forma limpia
+        Logger.log("TIEMPO TOTAL: " + duration + " ms");
+        Logger.close();
+    }
 
-        // 6. GENERAR CSV (Práctica 6: Resultados y archivo de salida)
-        generateCSV(airplanes, modo);
+    private static void finalizeSimulation(SimulationConfig config, List<Airplane> airplanes) {
+        generateCSV(airplanes, config.mode);
+        printRanking(airplanes);
+        JOptionPane.showMessageDialog(null, "Simulación finalizada.\nConsulta el log y el CSV para más detalles.", 
+            "AERON - Fin", JOptionPane.INFORMATION_MESSAGE);
+    }
 
-        // 7. MOSTRAR RESUMEN EN CONSOLA (Mejora de UX)
+    private static void printRanking(List<Airplane> airplanes) {
         System.out.println("\n=== RANKING DE EFICIENCIA ===");
         System.out.println(String.format("%-10s %-15s %s", "AVIÓN", "TIEMPO (ms)", "POS"));
         System.out.println("------------------------------------");
-        // Mostramos solo los 5 primeros para no saturar
-        // OPTIMIZACIÓN: Iteración simple sobre lista ya ordenada, O(1) para top 5
+        // Aseguramos ordenación por si acaso se llama fuera de contexto
+        airplanes.sort(Comparator.comparingLong(Airplane::getTotalTime));
+        
         for (int i = 0; i < Math.min(5, airplanes.size()); i++) {
             Airplane p = airplanes.get(i);
-            System.out.println(String.format("%-10s %-15d %dº",
-                    p.getFlightId(), p.getTotalTime(), i + 1));
+            System.out.println(String.format("%-10s %-15d %dº", p.getFlightId(), p.getTotalTime(), i + 1));
         }
+    }
 
-        System.out.println("\nSimulación finalizada con éxito. Cerrando aplicación...");
-        JOptionPane.showMessageDialog(null, "Simulación finalizada.\nConsulta el log y el CSV para más detalles.", "AERON - Fin", JOptionPane.INFORMATION_MESSAGE);
-        System.exit(0);
+    // --- AYUDANTES GUI ---
+
+    private static void showError(String message) {
+        JOptionPane.showMessageDialog(null, message, "Error en entrada", JOptionPane.ERROR_MESSAGE);
     }
 
     /**
