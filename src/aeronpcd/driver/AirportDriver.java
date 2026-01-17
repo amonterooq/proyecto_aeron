@@ -86,7 +86,8 @@ public class AirportDriver {
             UIManager.put("Label.font", mainFont);
             UIManager.put("ComboBox.font", mainFont);
             UIManager.put("TextField.font", mainFont);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     private static SimulationConfig showConfigurationDialog() {
@@ -94,9 +95,10 @@ public class AirportDriver {
         Font boldFont = new Font("Segoe UI", Font.BOLD, 18);
 
         // Componentes del formulario
-        JComboBox<String> comboModo = new JComboBox<>(new String[]{"-- Seleccione Modo --", "SECUENCIAL", "CONCURRENTE"});
+        JComboBox<String> comboModo = new JComboBox<>(
+                new String[] { "-- Seleccione Modo --", "SECUENCIAL", "CONCURRENTE" });
         comboModo.setFont(mainFont);
-        
+
         // Modelos de datos
         JSpinner spinAviones = new JSpinner(new SpinnerNumberModel(5, MIN_PLANES, MAX_PLANES, 1));
         JSpinner spinPistas = new JSpinner(new SpinnerNumberModel(3, MIN_RUNWAYS, MAX_RUNWAYS, 1));
@@ -109,7 +111,7 @@ public class AirportDriver {
         configureSpinner(spinOperarios, mainFont);
 
         // Lógica visual dinámica
-        spinOperarios.setEnabled(false); 
+        spinOperarios.setEnabled(false);
         comboModo.addActionListener(e -> {
             boolean isConcurrent = "CONCURRENTE".equals(comboModo.getSelectedItem());
             spinOperarios.setEnabled(isConcurrent);
@@ -119,28 +121,33 @@ public class AirportDriver {
         JPanel panel = new JPanel(new GridLayout(0, 2, 20, 20)); // Layout espacioso
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JLabel lblModo = new JLabel("Modo de Ejecución:"); 
+        JLabel lblModo = new JLabel("Modo de Ejecución:");
         lblModo.setFont(boldFont);
         panel.add(lblModo);
         panel.add(comboModo);
-        
-        panel.add(new JLabel("Número de Aviones (" + MIN_PLANES + "-" + MAX_PLANES + "):")); panel.add(spinAviones);
-        panel.add(new JLabel("Número de Pistas (" + MIN_RUNWAYS + "-" + MAX_RUNWAYS + "):"));  panel.add(spinPistas);
-        panel.add(new JLabel("Número de Puertas (" + MIN_GATES + "-" + MAX_GATES + "):")); panel.add(spinPuertas);
-        panel.add(new JLabel("Nº Operarios (Solo Concurrente):")); panel.add(spinOperarios);
+
+        panel.add(new JLabel("Número de Aviones (" + MIN_PLANES + "-" + MAX_PLANES + "):"));
+        panel.add(spinAviones);
+        panel.add(new JLabel("Número de Pistas (" + MIN_RUNWAYS + "-" + MAX_RUNWAYS + "):"));
+        panel.add(spinPistas);
+        panel.add(new JLabel("Número de Puertas (" + MIN_GATES + "-" + MAX_GATES + "):"));
+        panel.add(spinPuertas);
+        panel.add(new JLabel("Nº Operarios (Solo Concurrente):"));
+        panel.add(spinOperarios);
 
         // Bucle de validación
         while (true) {
-            int result = JOptionPane.showConfirmDialog(null, panel, "Configuración AERON", 
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            int result = JOptionPane.showConfirmDialog(null, panel, "Configuración AERON",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
-            if (result != JOptionPane.OK_OPTION) return null;
+            if (result != JOptionPane.OK_OPTION)
+                return null;
 
             if (comboModo.getSelectedIndex() == 0) {
                 showError("Por favor, seleccione un modo de ejecución válido.");
                 continue;
             }
-            
+
             try {
                 validateSpinner(spinAviones, "Aviones", MIN_PLANES, MAX_PLANES);
                 validateSpinner(spinPistas, "Pistas", MIN_RUNWAYS, MAX_RUNWAYS);
@@ -149,10 +156,10 @@ public class AirportDriver {
                     validateSpinner(spinOperarios, "Operarios", MIN_OPERATORS, MAX_OPERATORS);
                 }
             } catch (Exception e) {
-                 showError(e.getMessage());
-                 continue;
+                showError(e.getMessage());
+                continue;
             }
-            
+
             // Construir resultado
             SimulationConfig config = new SimulationConfig();
             config.mode = (String) comboModo.getSelectedItem();
@@ -160,7 +167,7 @@ public class AirportDriver {
             config.runways = (Integer) spinPistas.getValue();
             config.gates = (Integer) spinPuertas.getValue();
             config.operators = "CONCURRENTE".equals(config.mode) ? (Integer) spinOperarios.getValue() : 1;
-            
+
             return config;
         }
     }
@@ -168,10 +175,11 @@ public class AirportDriver {
     private static void initializeLogging(SimulationConfig config) {
         String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
         String logName;
-        
+
         if ("CONCURRENTE".equals(config.mode)) {
             logName = String.format("concurrente/aeron-%s-%d-%d-%d-%d-%s",
-                    config.mode.toLowerCase(), config.planes, config.runways, config.gates, config.operators, timeStamp);
+                    config.mode.toLowerCase(), config.planes, config.runways, config.gates, config.operators,
+                    timeStamp);
         } else {
             logName = String.format("secuencial/aeron-%s-%d-%d-%d-%s",
                     config.mode.toLowerCase(), config.planes, config.runways, config.gates, timeStamp);
@@ -181,18 +189,20 @@ public class AirportDriver {
         FlightPanel.setup(config.mode);
 
         Logger.log("=== INICIO SIMULACIÓN (" + config.mode + ") ===");
-        Logger.log(String.format("Configuración: %d Aviones, %d Pistas, %d Puertas, %d Operarios.", 
-                   config.planes, config.runways, config.gates, config.operators));
+        Logger.log(String.format("Configuración: %d Aviones, %d Pistas, %d Puertas, %d Operarios.",
+                config.planes, config.runways, config.gates, config.operators));
     }
 
     private static ControlTower initializeEnvironment(SimulationConfig config, AirportWindow window) {
         List<Runway> runways = new ArrayList<>();
-        for (int i = 1; i <= config.runways; i++) runways.add(new Runway("PIS" + i));
+        for (int i = 1; i <= config.runways; i++)
+            runways.add(new Runway("PIS" + i));
 
         List<Gate> gates = new ArrayList<>();
-        for (int i = 1; i <= config.gates; i++) gates.add(new Gate("PUE" + i));
+        for (int i = 1; i <= config.gates; i++)
+            gates.add(new Gate("PUE" + i));
 
-        ControlTower tower = new ControlTower(runways, gates);
+        ControlTower tower = new ControlTower(runways, gates, config.operators);
         tower.setWindow(window);
         return tower;
     }
@@ -214,7 +224,8 @@ public class AirportDriver {
             }
         } else {
             System.out.println("Lanzando " + config.planes + " aviones en paralelo...");
-            for (Airplane plane : airplanes) plane.start();
+            for (Airplane plane : airplanes)
+                plane.start();
 
             System.out.println("Esperando finalización de vuelos...");
             int done = 0;
@@ -241,8 +252,8 @@ public class AirportDriver {
     private static void finalizeSimulation(SimulationConfig config, List<Airplane> airplanes) {
         generateCSV(airplanes, config.mode);
         printRanking(airplanes);
-        JOptionPane.showMessageDialog(null, "Simulación finalizada.\nConsulta el log y el CSV para más detalles.", 
-            "AERON - Fin", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(null, "Simulación finalizada.\nConsulta el log y el CSV para más detalles.",
+                "AERON - Fin", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private static void printRanking(List<Airplane> airplanes) {
@@ -251,7 +262,7 @@ public class AirportDriver {
         System.out.println("------------------------------------");
         // Aseguramos ordenación por si acaso se llama fuera de contexto
         airplanes.sort(Comparator.comparingLong(Airplane::getTotalTime));
-        
+
         for (int i = 0; i < Math.min(5, airplanes.size()); i++) {
             Airplane p = airplanes.get(i);
             System.out.println(String.format("%-10s %-15d %dº", p.getFlightId(), p.getTotalTime(), i + 1));
@@ -305,8 +316,9 @@ public class AirportDriver {
         if (editor instanceof JSpinner.DefaultEditor) {
             JFormattedTextField tf = ((JSpinner.DefaultEditor) editor).getTextField();
             tf.setFont(font); // Aplicamos fuente grande también al campo de texto
-            
-            // IMPORTANTE: Evita que el spinner revierta automáticamente valores inválidos al perder foco.
+
+            // IMPORTANTE: Evita que el spinner revierta automáticamente valores inválidos
+            // al perder foco.
             // Esto permite que podamos "leer" el valor no válido y notificar al usuario.
             tf.setFocusLostBehavior(JFormattedTextField.PERSIST);
         }
@@ -320,12 +332,14 @@ public class AirportDriver {
             try {
                 int value = Integer.parseInt(text.trim());
                 if (value < min || value > max) {
-                     throw new Exception("El campo '" + name + "' debe estar entre " + min + " y " + max + ".");
+                    throw new Exception("El campo '" + name + "' debe estar entre " + min + " y " + max + ".");
                 }
-                // Si es válido, actualizamos el modelo explícitamente por si estaba en modo PERSIST sin commit
+                // Si es válido, actualizamos el modelo explícitamente por si estaba en modo
+                // PERSIST sin commit
                 spinner.setValue(value);
             } catch (NumberFormatException e) {
-                throw new Exception("El campo '" + name + "' contiene un valor inválido ('" + text + "').\nPor favor, introduce solo números enteros.");
+                throw new Exception("El campo '" + name + "' contiene un valor inválido ('" + text
+                        + "').\nPor favor, introduce solo números enteros.");
             }
         }
     }

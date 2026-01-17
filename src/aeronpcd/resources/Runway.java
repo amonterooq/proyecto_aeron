@@ -7,7 +7,7 @@ package aeronpcd.resources;
  */
 public class Runway {
     private String id;
-    private boolean available; // true = libre, false = ocupada
+    private volatile boolean available; // true = libre, false = ocupada
     private String occupiedBy; // ID del avión que la usa
 
     /**

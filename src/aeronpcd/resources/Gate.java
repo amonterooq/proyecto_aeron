@@ -6,7 +6,7 @@ package aeronpcd.resources;
  */
 public class Gate {
     private String id;
-    private boolean occupied;
+    private volatile boolean occupied;
     private String planeId;
 
     /**

@@ -39,17 +39,18 @@ public class ControlTower {
     private static final int MAX_QUEUE_SIZE = 15;
 
     /**
-     * @param runways Lista de pistas disponibles.
-     * @param gates   Lista de puertas de embarque disponibles.
+     * @param runways       Lista de pistas disponibles.
+     * @param gates         Lista de puertas de embarque disponibles.
+     * @param operatorCount Número de operarios (hilos) concurrentes.
      */
-    public ControlTower(List<Runway> runways, List<Gate> gates) {
+    public ControlTower(List<Runway> runways, List<Gate> gates, int operatorCount) {
         this.runways = runways;
         this.gates = gates;
         this.requestQueue = new LinkedList<>();
 
-        // Inicializamos y arrancamos los 5 operarios (Threads Daemon)
-        this.operators = new Operator[5];
-        for (int i = 0; i < 5; i++) {
+        // Inicializamos y arrancamos los operarios (Threads Daemon)
+        this.operators = new Operator[operatorCount];
+        for (int i = 0; i < operatorCount; i++) {
             operators[i] = new Operator("OP-" + (i + 1));
             operators[i].start();
         }
@@ -70,7 +71,7 @@ public class ControlTower {
         synchronized (requestQueue) {
             // Verificación de saturación (informativa)
             if (requestQueue.size() >= MAX_QUEUE_SIZE) {
-                System.err.println("ALERTA: Cola de torre saturada al recibir "
+                log("ALERTA", "Cola de torre saturada al recibir "
                         + request.getType() + " del vuelo " + request.getPlane().getFlightId());
             }
 
