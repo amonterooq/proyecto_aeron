@@ -1,0 +1,107 @@
+[15:33:33.706] [main      ] === INICIO SIMULACIÓN (SECUENCIAL) ===
+[15:33:33.706] [main      ] Configuración: 2 Aviones, 1 Pistas, 1 Puertas, 1 Operarios.
+[15:33:33.979] [main      ] Avión [IBE-001 - IN_FLIGHT] Inicia ciclo
+[15:33:33.979] [main      ] Avión [IBE-001 - IN_FLIGHT] El avión está en vuelo
+[15:33:33.979] [main      ] Avión [IBE-001 - IN_FLIGHT] Solicita aterrizaje a torre de control
+[15:33:33.983] [main      ] Avión [IBE-001 - LANDING_REQUESTED] Solicitud de aterrizaje en cola
+[15:33:33.983] [main      ] Avión [IBE-001 - LANDING_REQUEST] Espera autorización de aterrizaje
+[15:33:34.025] [main      ] [Torre     ] Recibida solicitud LANDING de IBE-001
+[15:33:34.031] [OP-1      ] Operario [OP-1] ha cogido una petición de tipo LANDING
+[15:33:34.033] [OP-1      ] Operario [OP-1] esta procesando la petición del AVION [IBE-001]
+[15:33:34.534] [OP-1      ] Operario [OP-1] ha procesado correctamente la petición del AVION [IBE-001]
+[15:33:34.538] [main      ] Avión [IBE-001 - LANDING_ASSIGNED] Aterrizaje autorizado
+[15:33:34.538] [main      ] Avión [IBE-001 - LANDING_ASSIGNED] Me ha tocado aterrizar en la Pista [PIS1]
+[15:33:34.538] [main      ] Avión [IBE-001 - LANDING_ASSIGNED] Me ha tocado embarcar en la Puerta [PUE1]
+[15:33:34.538] [main      ] Avión [IBE-001 - LANDING_ASSIGNED] ha notificado que va a empezar a aterrizar
+[15:33:34.554] [main      ] Avión [IBE-001 - LANDING] Aterrizando (143ms)...
+[15:33:34.702] [main      ] Avión [IBE-001 - LANDING] ha notificado que ha aterrizado
+[15:33:34.702] [main      ] [Torre     ] Recibida solicitud LANDED de IBE-001
+[15:33:34.702] [OP-1      ] Operario [OP-1] ha cogido una petición de tipo LANDED
+[15:33:34.702] [OP-1      ] Operario [OP-1] esta procesando la petición del AVION [IBE-001]
+[15:33:35.212] [OP-1      ] Operario [OP-1] ha procesado correctamente la petición del AVION [IBE-001]
+[15:33:35.213] [main      ] Avión [IBE-001 - LANDED] Aterrizado
+[15:33:35.213] [main      ] Avión [IBE-001 - LANDED] ha notificado que ha empezado el embarque
+[15:33:35.213] [main      ] Avión [IBE-001 - BOARDING] Embarcando (60ms)...
+[15:33:35.288] [main      ] 214 pasajeros del avión [IBE-001] han abordado
+[15:33:35.288] [main      ] [Torre     ] Recibida solicitud BOARDING de IBE-001
+[15:33:35.288] [OP-1      ] Operario [OP-1] ha cogido una petición de tipo BOARDING
+[15:33:35.288] [OP-1      ] Operario [OP-1] esta procesando la petición del AVION [IBE-001]
+[15:33:35.798] [OP-1      ] Operario [OP-1] ha procesado correctamente la petición del AVION [IBE-001]
+[15:33:35.799] [main      ] Avión [IBE-001 - BOARDING] ha notificado que ha finalizado el embarque
+[15:33:35.799] [main      ] [Torre     ] Recibida solicitud BOARDED de IBE-001
+[15:33:35.799] [OP-1      ] Operario [OP-1] ha cogido una petición de tipo BOARDED
+[15:33:35.799] [OP-1      ] Operario [OP-1] esta procesando la petición del AVION [IBE-001]
+[15:33:36.309] [OP-1      ] Operario [OP-1] ha procesado correctamente la petición del AVION [IBE-001]
+[15:33:36.311] [main      ] Avión [IBE-001 - BOARDED] Embarcado
+[15:33:36.311] [main      ] Avión [IBE-001 - BOARDED] ha notificado que quiere despegar
+[15:33:36.311] [main      ] Avión [IBE-001 - TAKEOFF_REQUESTED] Solicitud de despegue en cola
+[15:33:36.314] [main      ] Avión [IBE-001 - TAKEOFF_REQUESTED] Espera autorización de despegue
+[15:33:36.314] [main      ] [Torre     ] Recibida solicitud TAKEOFF de IBE-001
+[15:33:36.314] [OP-1      ] Operario [OP-1] ha cogido una petición de tipo TAKEOFF
+[15:33:36.314] [OP-1      ] Operario [OP-1] esta procesando la petición del AVION [IBE-001]
+[15:33:36.824] [OP-1      ] Operario [OP-1] ha procesado correctamente la petición del AVION [IBE-001]
+[15:33:36.826] [main      ] Avión [IBE-001 - TAKEOFF_ASSIGNED] Despegue autorizado
+[15:33:36.826] [main      ] Avión [IBE-001 - TAKEOFF_ASSIGNED] Me ha tocado despegar en la Pista [PIS1]
+[15:33:36.826] [main      ] Avión [IBE-001 - TAKEOFF_ASSIGNED] ha notificado que va a despegar
+[15:33:36.826] [main      ] Avión [IBE-001 - DEPARTING] Despegando (93ms)...
+[15:33:36.924] [main      ] Avión [IBE-001 - DEPARTING] ha notificado que ha despegado
+[15:33:36.926] [main      ] [Torre     ] Recibida solicitud DEPARTED de IBE-001
+[15:33:36.926] [OP-1      ] Operario [OP-1] ha cogido una petición de tipo DEPARTED
+[15:33:36.926] [OP-1      ] Operario [OP-1] esta procesando la petición del AVION [IBE-001]
+[15:33:37.439] [OP-1      ] Operario [OP-1] ha procesado correctamente la petición del AVION [IBE-001]
+[15:33:37.443] [main      ] Avión [IBE-001 - DEPARTED] El avión ha despegado
+[15:33:37.458] [main      ] Avión [IBE-001 - DEPARTED] 🏁 Completó ciclo en 3464 ms
+[15:33:37.462] [main      ] Avión [IBE-002 - IN_FLIGHT] Inicia ciclo
+[15:33:37.462] [main      ] Avión [IBE-002 - IN_FLIGHT] El avión está en vuelo
+[15:33:37.464] [main      ] Avión [IBE-002 - IN_FLIGHT] Solicita aterrizaje a torre de control
+[15:33:37.464] [main      ] Avión [IBE-002 - LANDING_REQUESTED] Solicitud de aterrizaje en cola
+[15:33:37.464] [main      ] Avión [IBE-002 - LANDING_REQUEST] Espera autorización de aterrizaje
+[15:33:37.464] [main      ] [Torre     ] Recibida solicitud LANDING de IBE-002
+[15:33:37.464] [OP-1      ] Operario [OP-1] ha cogido una petición de tipo LANDING
+[15:33:37.472] [OP-1      ] Operario [OP-1] esta procesando la petición del AVION [IBE-002]
+[15:33:37.979] [OP-1      ] Operario [OP-1] ha procesado correctamente la petición del AVION [IBE-002]
+[15:33:37.983] [main      ] Avión [IBE-002 - LANDING_ASSIGNED] Aterrizaje autorizado
+[15:33:37.983] [main      ] Avión [IBE-002 - LANDING_ASSIGNED] Me ha tocado aterrizar en la Pista [PIS1]
+[15:33:37.983] [main      ] Avión [IBE-002 - LANDING_ASSIGNED] Me ha tocado embarcar en la Puerta [PUE1]
+[15:33:37.983] [main      ] Avión [IBE-002 - LANDING_ASSIGNED] ha notificado que va a empezar a aterrizar
+[15:33:37.983] [main      ] Avión [IBE-002 - LANDING] Aterrizando (112ms)...
+[15:33:38.100] [main      ] Avión [IBE-002 - LANDING] ha notificado que ha aterrizado
+[15:33:38.100] [main      ] [Torre     ] Recibida solicitud LANDED de IBE-002
+[15:33:38.100] [OP-1      ] Operario [OP-1] ha cogido una petición de tipo LANDED
+[15:33:38.100] [OP-1      ] Operario [OP-1] esta procesando la petición del AVION [IBE-002]
+[15:33:38.608] [OP-1      ] Operario [OP-1] ha procesado correctamente la petición del AVION [IBE-002]
+[15:33:38.612] [main      ] Avión [IBE-002 - LANDED] Aterrizado
+[15:33:38.612] [main      ] Avión [IBE-002 - LANDED] ha notificado que ha empezado el embarque
+[15:33:38.612] [main      ] Avión [IBE-002 - BOARDING] Embarcando (54ms)...
+[15:33:38.670] [main      ] 172 pasajeros del avión [IBE-002] han abordado
+[15:33:38.670] [main      ] [Torre     ] Recibida solicitud BOARDING de IBE-002
+[15:33:38.670] [OP-1      ] Operario [OP-1] ha cogido una petición de tipo BOARDING
+[15:33:38.670] [OP-1      ] Operario [OP-1] esta procesando la petición del AVION [IBE-002]
+[15:33:39.176] [OP-1      ] Operario [OP-1] ha procesado correctamente la petición del AVION [IBE-002]
+[15:33:39.177] [main      ] Avión [IBE-002 - BOARDING] ha notificado que ha finalizado el embarque
+[15:33:39.177] [main      ] [Torre     ] Recibida solicitud BOARDED de IBE-002
+[15:33:39.177] [OP-1      ] Operario [OP-1] ha cogido una petición de tipo BOARDED
+[15:33:39.177] [OP-1      ] Operario [OP-1] esta procesando la petición del AVION [IBE-002]
+[15:33:39.693] [OP-1      ] Operario [OP-1] ha procesado correctamente la petición del AVION [IBE-002]
+[15:33:39.697] [main      ] Avión [IBE-002 - BOARDED] Embarcado
+[15:33:39.697] [main      ] Avión [IBE-002 - BOARDED] ha notificado que quiere despegar
+[15:33:39.697] [main      ] Avión [IBE-002 - TAKEOFF_REQUESTED] Solicitud de despegue en cola
+[15:33:39.697] [main      ] Avión [IBE-002 - TAKEOFF_REQUESTED] Espera autorización de despegue
+[15:33:39.697] [main      ] [Torre     ] Recibida solicitud TAKEOFF de IBE-002
+[15:33:39.697] [OP-1      ] Operario [OP-1] ha cogido una petición de tipo TAKEOFF
+[15:33:39.697] [OP-1      ] Operario [OP-1] esta procesando la petición del AVION [IBE-002]
+[15:33:40.209] [OP-1      ] Operario [OP-1] ha procesado correctamente la petición del AVION [IBE-002]
+[15:33:40.211] [main      ] Avión [IBE-002 - TAKEOFF_ASSIGNED] Despegue autorizado
+[15:33:40.211] [main      ] Avión [IBE-002 - TAKEOFF_ASSIGNED] Me ha tocado despegar en la Pista [PIS1]
+[15:33:40.211] [main      ] Avión [IBE-002 - TAKEOFF_ASSIGNED] ha notificado que va a despegar
+[15:33:40.211] [main      ] Avión [IBE-002 - DEPARTING] Despegando (107ms)...
+[15:33:40.320] [main      ] Avión [IBE-002 - DEPARTING] ha notificado que ha despegado
+[15:33:40.320] [main      ] [Torre     ] Recibida solicitud DEPARTED de IBE-002
+[15:33:40.320] [OP-1      ] Operario [OP-1] ha cogido una petición de tipo DEPARTED
+[15:33:40.320] [OP-1      ] Operario [OP-1] esta procesando la petición del AVION [IBE-002]
+[15:33:40.834] [OP-1      ] Operario [OP-1] ha procesado correctamente la petición del AVION [IBE-002]
+[15:33:40.838] [main      ] Avión [IBE-002 - DEPARTED] El avión ha despegado
+[15:33:40.838] [main      ] Avión [IBE-002 - DEPARTED] 🏁 Completó ciclo en 3376 ms
+[15:33:40.838] [main      ] === FIN DE LA SIMULACIÓN ===
+[15:33:40.838] [main      ] TIEMPO TOTAL: 6859 ms
+[15:33:40.858] [main      ] Archivo CSV generado correctamente: logs/secuencial/aeropuerto_resumen.csv

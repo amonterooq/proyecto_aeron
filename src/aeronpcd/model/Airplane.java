@@ -5,6 +5,8 @@ import aeronpcd.resources.Runway;
 import aeronpcd.tower.ControlTower;
 import aeronpcd.util.Logger;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 // PRÁCTICA 7: Extendemos de Thread para convertir al avión en un proceso independiente
 public class Airplane extends Thread {
 
@@ -14,7 +16,7 @@ public class Airplane extends Thread {
     private String flightId;
 
     private ControlTower tower;
-    private FlightStatus status;
+    private volatile FlightStatus status;
 
     // Recursos asignados por la torre
     private Runway currentRunway;
@@ -39,8 +41,21 @@ public class Airplane extends Thread {
      */
     @Override
     public void run() {
-        // Ejecutamos la lógica del ciclo de vida del avión
-        runSequential();
+        try {
+            // Desfase aleatorio inicial para evitar el efecto "avalancha" (Thundering Herd)
+            // en la simulación concurrente.
+            try {
+                Thread.sleep(ThreadLocalRandom.current().nextInt(100, 500));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            // Ejecutamos la lógica del ciclo de vida del avión
+            runSequential();
+        } catch (Throwable t) {
+            Logger.log("ERROR FATAL en Avión [" + flightId + "]: " + t.getMessage());
+            t.printStackTrace();
+        }
     }
 
     /**
@@ -49,78 +64,134 @@ public class Airplane extends Thread {
      * Este método contiene la secuencia lógica, pero las esperas son gestionadas
      * por monitores.
      */
+    /**
+     * Define el ciclo de vida completo del avión: IN_FLIGHT -> LANDING -> BOARDING
+     * -> TAKEOFF -> DEPARTED.
+     */
     public void runSequential() {
-        this.startTime = System.currentTimeMillis(); // Marca de tiempo de inicio
-        Logger.log("Avión [" + flightId + " - " + status + "] Inicia ciclo");
+        this.startTime = System.currentTimeMillis();
 
-        // --- FASE 1: ATERRIZAJE ---
+        // 1. IN_FLIGHT
+        this.status = FlightStatus.IN_FLIGHT;
+        Logger.log("Avión [" + flightId + " - IN_FLIGHT] Inicia ciclo"); // #1
+        Logger.log("Avión [" + flightId + " - IN_FLIGHT] El avión está en vuelo");
+
+        // --- FASE 2: SOLICITUD ATERRIZAJE ---
         this.status = FlightStatus.LANDING_REQUEST;
-        Logger.log("Avión [" + flightId + "] Solicita aterrizaje y ESPERA...");
+        Logger.log("Avión [" + flightId + " - IN_FLIGHT] Solicita aterrizaje a torre de control");
+        Logger.log("Avión [" + flightId + " - LANDING_REQUESTED] Solicitud de aterrizaje en cola");
+        Logger.log("Avión [" + flightId + " - LANDING_REQUEST] Espera autorización de aterrizaje");
 
-        // Enviamos petición a la torre y bloqueamos este hilo (wait()) hasta ser
-        // atendidos
         sendRequestAndWait(Request.Type.LANDING);
 
-        // Si la torre nos ha asignado recursos (estado cambiado a LANDING_ASSIGNED)
+        // --- FASE 3: ATERRIZAJE ASIGNADO ---
         if (this.status == FlightStatus.LANDING_ASSIGNED) {
-            Logger.log("Avión [" + flightId + "] Recibe luz verde. Asignado a " + currentRunway.getId());
+            // Logs requeridos en punto 3
+            Logger.log("Avión [" + flightId + " - LANDING_ASSIGNED] Aterrizaje autorizado");
+            Logger.log("Avión [" + flightId + " - LANDING_ASSIGNED] Me ha tocado aterrizar en la Pista ["
+                    + currentRunway.getId() + "]");
+            Logger.log("Avión [" + flightId + " - LANDING_ASSIGNED] Me ha tocado embarcar en la Puerta ["
+                    + currentGate.getId() + "]");
 
-            // Simulamos la maniobra de aterrizaje
-            performAction(100, "Aterrizando", FlightStatus.LANDING);
+            // --- FASE 4: ATERRIZANDO ---
+            Logger.log("Avión [" + flightId + " - LANDING_ASSIGNED] ha notificado que va a empezar a aterrizar");
+            performAction(randomTime(100, 150), "Aterrizando", FlightStatus.LANDING);
+            // performAction ya imprime "Avión [ID - LANDING] Aterrizando..."
 
-            // Avisamos de que hemos aterrizado (libera Pista)
+            // --- FASE 5: ATERRIZADO ---
+            // Logs requeridos punto 5
+            Logger.log("Avión [" + flightId + " - LANDING] ha notificado que ha aterrizado");
             sendRequestAndWait(Request.Type.LANDED);
+            Logger.log("Avión [" + flightId + " - LANDED] Aterrizado");
 
-            // --- FASE 2: EMBARQUE ---
-            performAction(50, "Embarcando", FlightStatus.BOARDING);
-            sendRequestAndWait(Request.Type.BOARDING); // Solo actualiza panel
+            // --- FASE 6: BOARDING ---
+            Logger.log("Avión [" + flightId + " - LANDED] ha notificado que ha empezado el embarque");
+            performAction(randomTime(50, 80), "Embarcando", FlightStatus.BOARDING);
+            int passengers = randomTime(100, 350); // Simulado con randomTime
+            Logger.log(passengers + " pasajeros del avión [" + flightId + "] han abordado");
 
-            // Fin de embarque (libera Puerta)
+            sendRequestAndWait(Request.Type.BOARDING); // Solo para actualizar panel/estado si necesario
+
+            // --- FASE 7: BOARDED ---
+            Logger.log("Avión [" + flightId + " - BOARDING] ha notificado que ha finalizado el embarque");
             sendRequestAndWait(Request.Type.BOARDED);
+            Logger.log("Avión [" + flightId + " - BOARDED] Embarcado");
 
-            // --- FASE 3: DESPEGUE ---
+            // --- FASE 8: TAKEOFF REQUEST ---
             this.status = FlightStatus.TAKEOFF_REQUESTED;
-            Logger.log("Avión [" + flightId + "] Solicita despegue y ESPERA...");
+            Logger.log("Avión [" + flightId + " - BOARDED] ha notificado que quiere despegar");
+            Logger.log("Avión [" + flightId + " - TAKEOFF_REQUESTED] Solicitud de despegue en cola");
+            Logger.log("Avión [" + flightId + " - TAKEOFF_REQUESTED] Espera autorización de despegue");
 
-            // Pedimos pista de despegue y esperamos
             sendRequestAndWait(Request.Type.TAKEOFF);
 
             if (this.status == FlightStatus.TAKEOFF_ASSIGNED) {
-                Logger.log("Avión [" + flightId + "] Recibe luz verde. Despegue en " + currentRunway.getId());
+                // --- FASE 9: TAKEOFF ASSIGNED ---
+                Logger.log("Avión [" + flightId + " - TAKEOFF_ASSIGNED] Despegue autorizado");
+                Logger.log("Avión [" + flightId + " - TAKEOFF_ASSIGNED] Me ha tocado despegar en la Pista ["
+                        + currentRunway.getId() + "]");
 
-                // Simulamos maniobra de despegue
-                performAction(100, "Despegando", FlightStatus.DEPARTING);
+                // --- FASE 10: DEPARTING ---
+                Logger.log("Avión [" + flightId + " - TAKEOFF_ASSIGNED] ha notificado que va a despegar");
+                performAction(randomTime(80, 150), "Despegando", FlightStatus.DEPARTING);
 
-                // Avisamos de que nos hemos ido (libera Pista)
+                // --- FASE 11: DEPARTED ---
+                Logger.log("Avión [" + flightId + " - DEPARTING] ha notificado que ha despegado");
+                // NOTA: Cambiamos estado antes de avisar para que el log del operario sea
+                // consistente
+                this.status = FlightStatus.DEPARTED;
                 sendRequestAndWait(Request.Type.DEPARTED);
+
+                Logger.log("Avión [" + flightId + " - DEPARTED] El avión ha despegado");
             }
         } else {
-            // PRÁCTICA 6: Gestión de errores si algo falló en la asignación
             Logger.log("Avión [" + flightId + "] ERROR: No pudo aterrizar.");
         }
 
         this.endTime = System.currentTimeMillis();
-        Logger.log("Avión [" + flightId + " - DEPARTED] Ciclo completado en " + getTotalTime() + " ms");
+        // Log final con icono requerido
+        Logger.log("Avión [" + flightId + " - DEPARTED] 🏁 Completó ciclo en " + getTotalTime() + " ms");
+    }
+
+    private volatile boolean resourceGranted = false;
+
+    /**
+     * Método para despertar al avión de forma segura.
+     * Invocado por la Torre de Control (Operario).
+     */
+    public synchronized void grantPermission() {
+        this.resourceGranted = true;
+        this.notifyAll(); // Usamos notifyAll para máxima seguridad
     }
 
     /**
      * Envía una petición a la Torre de Control y bloquea el hilo del avión actual.
-     * Patrón de sincronización: Wait-Notify.
-     * El avión espera pasivamente (wait) hasta que la Torre le asigne recursos y le
-     * despierte (notify).
+     * Patrón de sincronización: Wait-Notify con Flag (Guarded Block).
      * 
-     * @param type Tipo de petición (LANDING, TAKEOFF, etc.)
+     * CORRECCIÓN DEADLOCK: Se ha extraído la llamada a tower.addRequest() FUERA
+     * del bloque synchronized(this). Esto evita que el avión retenga su propio lock
+     * mientras intenta adquirir el lock de la Torre, previniendo el abrazo mortal
+     * si la Torre intenta adquirir el lock del Avión al mismo tiempo.
      */
     private void sendRequestAndWait(Request.Type type) {
+        // 1. Resetear flag (Sección crítica pequeña para asegurar memoria)
         synchronized (this) {
-            // Añadimos la petición a la cola de la torre
-            tower.addRequest(new Request(this, type));
-            try {
-                // El avión se duerme aquí librando la CPU. Despertará cuando el Operario haga
-                // plane.notify()
-                this.wait();
-            } catch (InterruptedException e) {
-                Logger.log("Avión [" + flightId + "] Interrumpido mientras esperaba.");
+            this.resourceGranted = false;
+        }
+
+        // 2. Publicar petición (SIN lock del avión)
+        // Aquí el hilo adquiere Lock(Torre) pero NO tiene Lock(Avión), rompiendo el
+        // ciclo.
+        tower.addRequest(new Request(this, type));
+
+        // 3. Esperar respuesta (Guarded Block)
+        synchronized (this) {
+            while (!this.resourceGranted) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    Logger.log("Avión [" + flightId + "] Interrumpido mientras esperaba.");
+                }
             }
         }
     }
@@ -138,6 +209,10 @@ public class Airplane extends Thread {
             // Reestablecemos el estado de interrupción por buenas prácticas
             Thread.currentThread().interrupt();
         }
+    }
+
+    private int randomTime(int min, int max) {
+        return ThreadLocalRandom.current().nextInt(min, max + 1);
     }
 
     // --- GETTERS Y SETTERS ---

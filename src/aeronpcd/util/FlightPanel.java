@@ -23,21 +23,28 @@ public class FlightPanel {
     private static String filePath = "flight_board.json";
 
     /**
-     * Configura el nombre del archivo JSON y su ubicación según el modo.
+     * Configura la ruta del archivo JSON.
+     * Ahora recibe la ruta completa para vincularla con el ID de la ejecución (Log).
      * 
-     * @param mode Modo de ejecución (SECUENCIAL o CONCURRENTE).
+     * @param fullPath Ruta completa del archivo JSON (sin extensión o con ella, manejada por el caller).
      */
-    public static void setup(String mode) {
-        // Se guarda dentro de la carpeta logs/secuencial o logs/concurrente para
-        // organización
-        filePath = "logs/" + mode.toLowerCase() + "/flight_board.json";
+    public static void setup(String fullPath) {
+        filePath = fullPath;
+    }
+
+    /**
+     * @deprecated Usar setup(String fullPath) directamente.
+     */
+    public static void setupCustomPath(String customPath) {
+        filePath = customPath;
     }
 
     /**
      * Actualiza el estado de un vuelo en memoria y persiste el cambio en el fichero
      * JSON.
      * Este método es Thread-Safe. La escritura se realiza en un bloque sincronizado
-     * y utiliza la misma lógica que antes, pero añade un pequeño control de errores mejorado.
+     * y utiliza la misma lógica que antes, pero añade un pequeño control de errores
+     * mejorado.
      * 
      * @param flightId Identificador del vuelo (ej. IBE-001)
      * @param status   Nuevo estado (ej. LANDED, BOARDING)
@@ -47,8 +54,8 @@ public class FlightPanel {
         try {
             saveToJson(); // Persiste a disco
         } catch (Exception e) {
-             // Evitar que un error de IO detenga el hilo del avión
-             System.err.println("Error no crítico al actualizar panel: " + e.getMessage());
+            // Evitar que un error de IO detenga el hilo del avión
+            System.err.println("Error no crítico al actualizar panel: " + e.getMessage());
         }
     }
 

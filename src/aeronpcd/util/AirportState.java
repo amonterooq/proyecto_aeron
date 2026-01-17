@@ -102,14 +102,14 @@ public class AirportState {
             for (Request r : queue) {
                 // Obtenemos el ID del avión asociado a la petición
                 String planeId = (r.getPlane() != null) ? r.getPlane().getFlightId() : "??";
-                
+
                 // Color coding según tipo de petición
                 String colorStyle = getRequestColor(r.getType());
-                
+
                 sb.append("<li><b>").append(i++).append(".</b> ")
-                  .append("<span style='color:").append(colorStyle).append(";'>")
-                  .append(r.getType()).append("</span>")
-                  .append(" &rarr; ").append(planeId).append("</li>");
+                        .append("<span style='color:").append(colorStyle).append(";'>")
+                        .append(r.getType()).append("</span>")
+                        .append(" &rarr; ").append(planeId).append("</li>");
             }
         }
         sb.append("</ul>");
@@ -121,12 +121,16 @@ public class AirportState {
      */
     private static String getRequestColor(Request.Type type) {
         switch (type) {
-            case LANDING: return "#FF4444"; // Rojo (Crítico)
-            case TAKEOFF: return "#FFAA00"; // Naranja
-            case LANDED: 
-            case BOARDED: 
-            case DEPARTED: return "#00FF00"; // Verde (Liberación)
-            default: return "#FFFFFF";
+            case LANDING:
+                return "#FF4444"; // Rojo (Crítico)
+            case TAKEOFF:
+                return "#FFAA00"; // Naranja
+            case LANDED:
+            case BOARDED:
+            case DEPARTED:
+                return "#00FF00"; // Verde (Liberación)
+            default:
+                return "#FFFFFF";
         }
     }
 

@@ -178,21 +178,31 @@ public class AirportDriver {
         }
     }
 
+    // Variable global para almacenar el nombre base del log actual y reutilizarlo
+    private static String currentLogBaseName;
+
     private static void initializeLogging(SimulationConfig config) {
         String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
         String logName;
 
+        // Formato: aeron-MODE-N1AV-N2PIS-N3PUE[-N4OPE]-TIMESTAMP
         if (MODE_CON.equals(config.mode)) {
-            logName = String.format("concurrente/aeron-%s-%d-%d-%d-%d-%s",
+            logName = String.format("concurrente/aeron-%s-%dAV-%dPIS-%dPUE-%dOPE-%s",
                     config.mode.toLowerCase(), config.planes, config.runways, config.gates, config.operators,
                     timeStamp);
         } else {
-            logName = String.format("secuencial/aeron-%s-%d-%d-%d-%s",
+            logName = String.format("secuencial/aeron-%s-%dAV-%dPIS-%dPUE-%s",
                     config.mode.toLowerCase(), config.planes, config.runways, config.gates, timeStamp);
         }
+        
+        // Guardamos el nombre base para generar CSV y JSON asociados
+        currentLogBaseName = logName;
 
         Logger.setup(logName);
-        FlightPanel.setup(config.mode);
+        
+        // Configurar FlightPanel para guardar JSON con el mismo patrón de nombre
+        // Ejemplo: logs/secuencial/aeron-..._board.json
+        FlightPanel.setup("logs/" + currentLogBaseName + "_board.json");
 
         Logger.log("=== INICIO SIMULACIÓN (" + config.mode + ") ===");
         Logger.log(String.format("Configuración: %d Aviones, %d Pistas, %d Puertas, %d Operarios.",
@@ -235,13 +245,12 @@ public class AirportDriver {
 
             Logger.log("Esperando finalización de vuelos...");
             int done = 0;
+            // Espera activa a través de los hilos de avión
             for (Airplane plane : airplanes) {
                 try {
-                    plane.join();
+                    plane.join(); // Espera a que este hilo muera
                     done++;
-                    if (done % 5 == 0 || done == config.planes) {
-                        Logger.log("Progreso: " + done + "/" + config.planes + " activados.");
-                    }
+                    Logger.log("Progreso: " + done + "/" + config.planes + " aviones finalizados.");
                 } catch (InterruptedException e) {
                     Logger.log("Driver interrumpido: " + e.getMessage());
                 }
@@ -260,6 +269,8 @@ public class AirportDriver {
         printRanking(airplanes);
         JOptionPane.showMessageDialog(null, "Simulación finalizada.\nConsulta el log y el CSV para más detalles.",
                 "AERON - Fin", JOptionPane.INFORMATION_MESSAGE);
+        // Cierra explícitamente la aplicación (y todas las ventanas) al pulsar OK
+        System.exit(0);
     }
 
     private static void printRanking(List<Airplane> airplanes) {
@@ -290,8 +301,14 @@ public class AirportDriver {
      * @param modo      Modo de ejecución para generar el nombre del archivo.
      */
     private static void generateCSV(List<Airplane> airplanes, String modo) {
-        // Se guarda dentro de la carpeta logs/secuencial o logs/concurrente
-        String fileName = "logs/" + modo.toLowerCase() + "/aeropuerto_resumen.csv";
+        // Se guarda asociado al LOG actual: logs/.../aeron-..._resumen.csv
+        // Si no hay logBaseName (ej. ejecuciones antiguas o test raro), fallback
+        String fileName;
+        if (currentLogBaseName != null) {
+            fileName = "logs/" + currentLogBaseName + "_resumen.csv"; 
+        } else {
+            fileName = "logs/" + modo.toLowerCase() + "/aeropuerto_resumen.csv";
+        }
 
         // Ordenamos la lista de aviones por su tiempo total de operación (ascendente)
         airplanes.sort(Comparator.comparingLong(Airplane::getTotalTime));

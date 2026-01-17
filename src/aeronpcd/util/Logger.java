@@ -40,6 +40,14 @@ public class Logger {
      * @param message El mensaje a registrar.
      */
     public static synchronized void log(String message) {
+        // Formato simplificado sin timestamp/thread en consola si el mensaje ya lo trae
+        // Pero para cumplir estrictamente con el formato solicitado, asumimos que
+        // 'message' es el contenido puro y aquí le añadimos el contexto.
+
+        // Si el usuario quiere mensajes MUY específicos sin prefijos estándar,
+        // deberíamos detectar si es un mensaje de sistema o de log normal.
+        // Por ahora mantenemos el formato robusto de depuración.
+
         String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS"));
         String threadName = Thread.currentThread().getName();
 
@@ -47,6 +55,7 @@ public class Logger {
         String formattedMessage = String.format("[%s] [%-10s] %s", time, threadName, message);
 
         System.out.println(formattedMessage);
+        System.out.flush(); // Forzar salida a consola inmediatamente
 
         if (fileWriter != null) {
             fileWriter.println(formattedMessage);
