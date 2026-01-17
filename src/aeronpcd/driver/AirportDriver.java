@@ -35,6 +35,10 @@ public class AirportDriver {
     private static final int MIN_GATES = 1, MAX_GATES = 20;
     private static final int MIN_OPERATORS = 1, MAX_OPERATORS = 20;
 
+    // Constantes de Modo
+    private static final String MODE_SEQ = "SECUENCIAL";
+    private static final String MODE_CON = "CONCURRENTE";
+
     private static class SimulationConfig {
         String mode;
         int planes;
@@ -72,6 +76,8 @@ public class AirportDriver {
 
         // 6. Cierre y Reporting
         finalizeSimulation(config, airplanes);
+
+        Logger.close();
     }
 
     // --- MÉTODOS DE SOPORTE ESTRUCTURAL ---
@@ -96,7 +102,7 @@ public class AirportDriver {
 
         // Componentes del formulario
         JComboBox<String> comboModo = new JComboBox<>(
-                new String[] { "-- Seleccione Modo --", "SECUENCIAL", "CONCURRENTE" });
+                new String[] { "-- Seleccione Modo --", MODE_SEQ, MODE_CON });
         comboModo.setFont(mainFont);
 
         // Modelos de datos
@@ -113,7 +119,7 @@ public class AirportDriver {
         // Lógica visual dinámica
         spinOperarios.setEnabled(false);
         comboModo.addActionListener(e -> {
-            boolean isConcurrent = "CONCURRENTE".equals(comboModo.getSelectedItem());
+            boolean isConcurrent = MODE_CON.equals(comboModo.getSelectedItem());
             spinOperarios.setEnabled(isConcurrent);
         });
 
@@ -166,7 +172,7 @@ public class AirportDriver {
             config.planes = (Integer) spinAviones.getValue();
             config.runways = (Integer) spinPistas.getValue();
             config.gates = (Integer) spinPuertas.getValue();
-            config.operators = "CONCURRENTE".equals(config.mode) ? (Integer) spinOperarios.getValue() : 1;
+            config.operators = MODE_CON.equals(config.mode) ? (Integer) spinOperarios.getValue() : 1;
 
             return config;
         }
@@ -176,7 +182,7 @@ public class AirportDriver {
         String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
         String logName;
 
-        if ("CONCURRENTE".equals(config.mode)) {
+        if (MODE_CON.equals(config.mode)) {
             logName = String.format("concurrente/aeron-%s-%d-%d-%d-%d-%s",
                     config.mode.toLowerCase(), config.planes, config.runways, config.gates, config.operators,
                     timeStamp);
@@ -218,35 +224,35 @@ public class AirportDriver {
     private static void runSimulation(SimulationConfig config, List<Airplane> airplanes) {
         long start = System.currentTimeMillis();
 
-        if ("SECUENCIAL".equals(config.mode)) {
+        if (MODE_SEQ.equals(config.mode)) {
             for (Airplane plane : airplanes) {
                 plane.runSequential();
             }
         } else {
-            System.out.println("Lanzando " + config.planes + " aviones en paralelo...");
+            Logger.log("Lanzando " + config.planes + " aviones en paralelo...");
             for (Airplane plane : airplanes)
                 plane.start();
 
-            System.out.println("Esperando finalización de vuelos...");
+            Logger.log("Esperando finalización de vuelos...");
             int done = 0;
             for (Airplane plane : airplanes) {
                 try {
                     plane.join();
                     done++;
                     if (done % 5 == 0 || done == config.planes) {
-                        System.out.println("Progreso: " + done + "/" + config.planes + " activados.");
+                        Logger.log("Progreso: " + done + "/" + config.planes + " activados.");
                     }
                 } catch (InterruptedException e) {
                     Logger.log("Driver interrumpido: " + e.getMessage());
                 }
             }
-            System.out.println("Todos los aviones han finalizado.");
+            Logger.log("Todos los aviones han finalizado.");
         }
 
         long duration = System.currentTimeMillis() - start;
         Logger.log("=== FIN DE LA SIMULACIÓN ===");
         Logger.log("TIEMPO TOTAL: " + duration + " ms");
-        Logger.close();
+        // Logger.close() movido a main
     }
 
     private static void finalizeSimulation(SimulationConfig config, List<Airplane> airplanes) {
@@ -301,10 +307,11 @@ public class AirportDriver {
                         plane.getFlightId(), plane.getTotalTime(), rank));
                 rank++;
             }
-            System.out.println("Archivo CSV generado correctamente: " + fileName);
+            Logger.log("Archivo CSV generado correctamente: " + fileName);
         } catch (IOException e) {
             // PRÁCTICA 6: Gestión de excepción de escritura CSV
             System.err.println("Error al escribir el CSV: " + e.getMessage());
+            Logger.log("Error al escribir el CSV: " + e.getMessage());
         }
     }
 
