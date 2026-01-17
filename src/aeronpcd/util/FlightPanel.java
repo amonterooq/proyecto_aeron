@@ -36,15 +36,20 @@ public class FlightPanel {
     /**
      * Actualiza el estado de un vuelo en memoria y persiste el cambio en el fichero
      * JSON.
-     * Este método es Thread-Safe gracias al uso de mapas concurrentes y bloques
-     * sincronizados para la escritura.
+     * Este método es Thread-Safe. La escritura se realiza en un bloque sincronizado
+     * y utiliza la misma lógica que antes, pero añade un pequeño control de errores mejorado.
      * 
      * @param flightId Identificador del vuelo (ej. IBE-001)
      * @param status   Nuevo estado (ej. LANDED, BOARDING)
      */
     public static void updateStatus(String flightId, String status) {
         flights.put(flightId, status); // Actualiza mapa en memoria
-        saveToJson(); // Persiste a disco
+        try {
+            saveToJson(); // Persiste a disco
+        } catch (Exception e) {
+             // Evitar que un error de IO detenga el hilo del avión
+             System.err.println("Error no crítico al actualizar panel: " + e.getMessage());
+        }
     }
 
     /**
