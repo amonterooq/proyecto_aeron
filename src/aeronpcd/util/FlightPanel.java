@@ -29,14 +29,16 @@ public class FlightPanel {
      * @param fullPath Ruta completa del archivo JSON (sin extensión o con ella, manejada por el caller).
      */
     public static void setup(String fullPath) {
+        flights.clear();
         filePath = fullPath;
     }
 
     /**
      * @deprecated Usar setup(String fullPath) directamente.
      */
+    @Deprecated
     public static void setupCustomPath(String customPath) {
-        filePath = customPath;
+        setup(customPath);
     }
 
     /**

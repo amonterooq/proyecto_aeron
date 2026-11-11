@@ -1,0 +1,19 @@
+# Compilación y resultados locales
+/bin/
+/build/
+/logs/
+/test/
+/flight_board.json
+*.class
+*.log
+
+# Entorno local
+/private-notes/
+/.vscode/
+/.idea/
+*.iml
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example

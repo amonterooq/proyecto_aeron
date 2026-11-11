@@ -1,4 +1,6 @@
 # MEMORIA DEL PROYECTO AERON
+> Memoria académica conservada. Para compilar y ejecutar la versión del repositorio, consulta [README.md](README.md). Las [aclaraciones técnicas](docs/ARCHITECTURE.md) precisan algunos puntos de esta memoria: se usa JDK 21; no existe un límite `MAX_QUEUE_SIZE` implementado; la planificación no demuestra ausencia formal de inanición; la separación por paquetes no constituye un MVC estricto. El JSON se guarda con el nombre de cada ejecución. No se modifican estas conclusiones históricas como si fueran resultados nuevos.
+
 ## Simulador Aeroportuario Concurrente
 ### Asignatura: Programación Concurrente y Distribuida
 
@@ -91,7 +93,7 @@ El sistema implementa captura de excepciones específicas para garantizar estabi
 *   JDK 17 o superior (Compilado con `--release 21`).
 
 ### Comandos de Compilación y Ejecución
-Para ejecutar el proyecto desde la raíz (`path/to/proyecto_aeron`):
+Para ejecutar el proyecto desde la raíz (`path/to/MonteroPreciado_Ana_AERON_PCD`):
 
 1.  **Compilar:**
     ```powershell

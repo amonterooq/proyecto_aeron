@@ -1,6 +1,7 @@
 package aeronpcd.test;
 
 import aeronpcd.model.Airplane;
+import aeronpcd.model.FlightStatus;
 import aeronpcd.resources.Gate;
 import aeronpcd.resources.Runway;
 import aeronpcd.tower.ControlTower;
@@ -15,6 +16,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class TestRunner {
 
@@ -22,7 +25,21 @@ public class TestRunner {
     private static final String MODE_CON = "CONCURRENTE";
 
     public static void main(String[] args) {
+        // Un bloqueo de concurrencia debe fallar en CI, no esperar indefinidamente.
+        Thread watchdog = new Thread(() -> {
+            try {
+                Thread.sleep(300_000);
+                System.err.println("FAIL: la batería excedió el límite de 300 segundos.");
+                System.exit(1);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }, "test-timeout");
+        watchdog.setDaemon(true);
+        watchdog.start();
         // Asegurar que la carpeta 'test' y subcarpetas existen
+        // Logger antepone logs/; la ruta logs/../test también debe funcionar en un clon limpio.
+        new File("logs").mkdirs();
         new File("test/secuencial").mkdirs();
         new File("test/concurrente").mkdirs();
 
@@ -69,7 +86,8 @@ public class TestRunner {
         
         // Configuramos FlightPanel en la carpeta test también
         // Usamos el mismo nombre base que el log para vincularlos: ..._board.json
-        FlightPanel.setupCustomPath(logName + "_board.json");
+        String outputBase = Path.of("logs", logName).normalize().toString();
+        FlightPanel.setup(outputBase + "_board.json");
         
         Logger.log("=== INICIO TEST #" + id + " ===");
 
@@ -104,7 +122,8 @@ public class TestRunner {
                 try {
                     plane.join();
                 } catch (InterruptedException e) {
-                    Logger.log("Test interrumpido esperando a " + plane.getName());
+                    Thread.currentThread().interrupt();
+                    throw new AssertionError("Test interrumpido esperando a " + plane.getName(), e);
                 }
             }
         }
@@ -114,7 +133,8 @@ public class TestRunner {
 
         // 5. Generar CSV propio del test
         // Usamos logName como base para el CSV: ..._resumen.csv
-        generateCSV(airline, logName + "_resumen.csv");
+        generateCSV(airline, outputBase + "_resumen.csv");
+        verifyResults(airline, runwayList, gateList, outputBase);
 
         System.out.println("    -> Finalizado en " + duration + " ms.");
         Logger.close();
@@ -135,7 +155,40 @@ public class TestRunner {
             }
             Logger.log("CSV Generado: " + fullPath);
         } catch (IOException e) {
-            Logger.log("Error generando CSV: " + e.getMessage());
+            throw new AssertionError("Error generando CSV", e);
         }
+    }
+
+    private static void verifyResults(List<Airplane> airplanes, List<Runway> runways,
+            List<Gate> gates, String outputBase) {
+        for (Airplane plane : airplanes) {
+            if (plane.getStatus() != FlightStatus.DEPARTED || plane.getTotalTime() <= 0) {
+                throw new AssertionError("Vuelo incompleto: " + plane.getFlightId());
+            }
+        }
+        if (runways.stream().anyMatch(r -> !r.isAvailable()) || gates.stream().anyMatch(Gate::isOccupied)) {
+            throw new AssertionError("Quedan recursos ocupados al finalizar");
+        }
+        try {
+            if (Files.readAllLines(Path.of(outputBase + "_resumen.csv")).size() != airplanes.size() + 1) {
+                throw new AssertionError("Número incorrecto de filas en CSV");
+            }
+            String board = Files.readString(Path.of(outputBase + "_board.json"));
+            for (Airplane plane : airplanes) {
+                if (!board.contains("\"" + plane.getFlightId() + "\": \"DEPARTED\"")) {
+                    throw new AssertionError("Panel incompleto: " + plane.getFlightId());
+                }
+            }
+            long entries = board.lines().filter(line -> line.contains(":" )).count();
+            if (entries != airplanes.size()) {
+                throw new AssertionError("El panel contiene vuelos de otra simulación");
+            }
+            if (Files.size(Path.of(outputBase + ".log")) == 0) {
+                throw new AssertionError("Log vacío");
+            }
+        } catch (IOException e) {
+            throw new AssertionError("No se pudieron verificar los resultados", e);
+        }
+        System.out.println("PASS: vuelos completados, recursos libres y resultados verificados.");
     }
 }
